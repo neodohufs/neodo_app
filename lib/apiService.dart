@@ -7,7 +7,7 @@ class ApiService {
   Future<User?> getUserInfo() async {
     final token = await getAccessToken();
     final url = Uri.parse(
-        'https://1655-1-230-133-117.ngrok-free.app/api/users/my-page');
+        'https://1d93-203-234-105-223.ngrok-free.app/api/users/my-page');
     final response = await http.get(
       url,
       headers: {

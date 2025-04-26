@@ -32,7 +32,6 @@ void main() {
   );
 }
 
-
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -52,30 +51,32 @@ class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
   @override
-  State<MainPage> createState() => _MainPage();
+  State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPage extends State<MainPage> {
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  //Service service = Service();
-
+class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('NeoDo'),
+        title: const Text(
+          'Donut',
+          style: TextStyle(color: Colors.lightBlue),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
         actions: [
           TextButton(
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => LoginPage(),
+                  builder: (context) => LoginPage(), // 여기에 실제 LoginPage 넣기
                 ),
               );
             },
-            child: Text(
+            child: const Text(
               "Login",
               style: TextStyle(color: Colors.black),
             ),
@@ -83,14 +84,46 @@ class _MainPage extends State<MainPage> {
         ],
       ),
       body: Center(
-        child: Text(
-          '너의 스피치를 도와줄게',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        child: RichText(
+          text: TextSpan(
+            style: const TextStyle(fontSize: 24, color: Colors.black),
+            children: [
+              TextSpan(
+                text: '도',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.lightBlue,
+                  fontSize: 30,
+                ),
+              ),
+              const TextSpan(text: '와줄게 '),
+              TextSpan(
+                text: '너',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.lightBlue,
+                  fontSize: 30,
+                ),
+              ),
+              const TextSpan(text: '의 '),
+              TextSpan(
+                text: '스',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.lightBlue,
+                  fontSize: 30,
+                ),
+              ),
+              const TextSpan(text: '피치'),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -114,10 +147,11 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             Center(
               child: Text(
-                "NeoDo",
+                "Donut",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
+                  color: Colors.lightBlue,
                 ),
               ),
             ),
@@ -128,9 +162,14 @@ class _LoginPageState extends State<LoginPage> {
               controller: emailController,
               decoration: InputDecoration(
                 labelText: "Email",
+                labelStyle: TextStyle(color: Colors.lightBlue), // 라벨 텍스트 색상
                 border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.email),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.lightBlue), // 포커스 시 테두리 색
+                ),
+                prefixIcon: Icon(Icons.email, color: Colors.lightBlue), // 아이콘 색상
               ),
+              cursorColor: Colors.lightBlue, // 커서 색상
             ),
 
             SizedBox(height: 16),
@@ -141,9 +180,14 @@ class _LoginPageState extends State<LoginPage> {
               obscureText: true,
               decoration: InputDecoration(
                 labelText: "Password",
+                labelStyle: TextStyle(color: Colors.lightBlue), // 라벨 텍스트 색상
                 border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.lock),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.lightBlue), // 포커스 시 테두리 색
+                ),
+                prefixIcon: Icon(Icons.lock, color: Colors.lightBlue), // 아이콘 색상
               ),
+              cursorColor: Colors.lightBlue, // 커서 색상
             ),
 
             SizedBox(height: 32),
@@ -153,7 +197,7 @@ class _LoginPageState extends State<LoginPage> {
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 16),
               ),
-              child: Text("Log In", style: TextStyle(fontSize: 18)),
+              child: Text("Log In", style: TextStyle(fontSize: 18, color: Colors.lightBlue)),
               onPressed: () {
                 login(context);
                 /*Navigator.push(
@@ -193,7 +237,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final response = await http.post(
         Uri.parse(
-            'https://1655-1-230-133-117.ngrok-free.app/api/users/login'), // ✅ 실제 API 주소
+            'https://1d93-203-234-105-223.ngrok-free.app/api/users/login'), // ✅ 실제 API 주소
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           'email': emailController.text,
@@ -268,7 +312,7 @@ class _SignUpPageState extends State<SignUpPage> {
           children: [
             Center(
               child: Text(
-                "NeoDo",
+                "Donut",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -335,7 +379,7 @@ class _SignUpPageState extends State<SignUpPage> {
     try {
       final response = await http.post(
         Uri.parse(
-            "https://1655-1-230-133-117.ngrok-free.app/api/users/signup"), // 실제 API 주소 사용
+            "https://1d93-203-234-105-223.ngrok-free.app/api/users/signup"), // 실제 API 주소 사용
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(
             {'username': username, 'email': email, 'password': password}),
@@ -358,7 +402,7 @@ class _SignUpPageState extends State<SignUpPage> {
     try {
       final response = await http.post(
         Uri.parse(
-            'https://1655-1-230-133-117.ngrok-free.app/api/users/login'), // 실제 API 주소 사용
+            'https://1d93-203-234-105-223.ngrok-free.app/api/users/login'), // 실제 API 주소 사용
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           'email': emailController.text,
@@ -477,7 +521,7 @@ class _HomePageState extends State<HomePage> {
     }
   }*/
   postFile(File file, String atmosphere, String purpose, String scale, String audience, int deadline, String title) async {
-    final uri = 'https://1655-1-230-133-117.ngrok-free.app/api/speech-boards/record';
+    final uri = 'https://1d93-203-234-105-223.ngrok-free.app/api/speech-boards/record';
 
     // SharedPreferences에서 accessToken 가져오기
     final token = await getAccessToken();
@@ -775,7 +819,7 @@ class _HomePageState extends State<HomePage> {
       key: _scaffoldKey, // Scaffold에 GlobalKey 추가
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('NeoDo'),
+        title: Text('Donut'),
         centerTitle: true,
         automaticallyImplyLeading: false, // 기본 back 버튼 숨기기
         leading: IconButton(
@@ -792,7 +836,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               // 사용자 정보 영역
               UserAccountsDrawerHeader(
-                decoration: BoxDecoration(color: Colors.purple),
+                decoration: BoxDecoration(color: Colors.lightBlue),
                 accountName: Text(
                   user?.username ?? 'Loading...', // 실제 사용자 이름을 여기에 표시
                   style: TextStyle(
@@ -807,7 +851,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 currentAccountPicture: CircleAvatar(
-                  backgroundColor: Colors.amber,
+                  backgroundColor: Colors.lightBlue,
                   child: Icon(Icons.person, size: 50, color: Colors.white),
                 ),
               ),
@@ -914,7 +958,7 @@ class _HomePageState extends State<HomePage> {
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             minimumSize: Size(150, 100),
-            backgroundColor: Colors.purple,
+            backgroundColor: Colors.lightBlue,
             foregroundColor: Colors.amber,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -1050,7 +1094,7 @@ class AudioProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> fetchAudioFiles() async {
-    final url = 'https://1655-1-230-133-117.ngrok-free.app/api/speech-boards';
+    final url = 'https://1d93-203-234-105-223.ngrok-free.app/api/speech-boards';
 
     final token = await getAccessToken();
 
@@ -1167,7 +1211,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
       final dio = Dio();
       final response = await http.get(
         Uri.parse(
-            "https://1655-1-230-133-117.ngrok-free.app/api/speech-boards/$speechBoardId/feedback"),
+            "https://1d93-203-234-105-223.ngrok-free.app/api/speech-boards/$speechBoardId/feedback"),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken', // GET 요청에 Authorization 헤더 추가
@@ -1201,7 +1245,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
       // 백엔드에서 GET 요청으로 record 데이터 받아오기
       final response = await http.get(
         Uri.parse(
-            "https://1655-1-230-133-117.ngrok-free.app/api/speech-boards/$speechBoardId/record"),
+            "https://1d93-203-234-105-223.ngrok-free.app/api/speech-boards/$speechBoardId/record"),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken', // GET 요청에 Authorization 헤더 추가
@@ -1559,7 +1603,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
   Future<void> fetchTopics() async {
     final accessToken = await getAccessToken();
     final response = await http.get(
-      Uri.parse("https://1655-1-230-133-117.ngrok-free.app/api/speech-coachings"),
+      Uri.parse("https://1d93-203-234-105-223.ngrok-free.app/api/speech-coachings"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
@@ -1607,7 +1651,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
           width: 70, // 원하는 크기로 설정
           height: 70,
           decoration: BoxDecoration(
-            color: Colors.cyan,
+            color: Colors.lightBlue,
             shape: BoxShape.circle, // 둥근 버튼 모양 유지
           ),
           child: RawMaterialButton(
@@ -1731,9 +1775,30 @@ class CoachingScriptWritePage extends StatefulWidget {
 }
 
 class _CoachingScriptPageState extends State<CoachingScriptWritePage> {
-
   TextEditingController _controller = TextEditingController();
-  
+
+  void _submitScript() {
+    final scriptText = _controller.text.trim();
+
+    if (scriptText.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('대본을 입력해주세요.'),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(bottom: 80, left: 20, right: 20),
+        ),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MetadataSelectionPage(script: scriptText),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1758,23 +1823,24 @@ class _CoachingScriptPageState extends State<CoachingScriptWritePage> {
               Row(
                 children: [
                   Expanded(
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => CoachingPlanPage()));
-                        },
-                        child: Text("취소"),
-                      ),
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => CoachingPlanPage()),
+                        );
+                      },
+                      child: Text("취소"),
+                    ),
                   ),
                   Expanded(
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => CoachingScriptFeedbackPage()));
-                        },
-                        child: Text("확인"),
-                      ),
+                    child: TextButton(
+                      onPressed: _submitScript,
+                      child: Text("완료"),
+                    ),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),
@@ -1783,45 +1849,416 @@ class _CoachingScriptPageState extends State<CoachingScriptWritePage> {
   }
 }
 
-class CoachingScriptFeedbackPage extends StatefulWidget {
+class MetadataSelectionPage extends StatefulWidget {
+  final String script;
+  MetadataSelectionPage({required this.script});
+
+  @override
+  _MetadataSelectionPageState createState() => _MetadataSelectionPageState();
+}
+
+class _MetadataSelectionPageState extends State<MetadataSelectionPage> {
+  String _selectedAtmosphere = '';
+  String _selectedPurpose = '';
+  String _selectedScale = '';
+  String _selectedAudience = '';
+  TextEditingController _deadlineController = TextEditingController();
+
+  Map<String, String> koreanToEnglish = {
+    "공식적": "FORMAL",
+    "비공식적": "INFORMAL",
+    "정보 전달": "INFORMATIVE",
+    "보고": "REPORTING",
+    "설득": "PERSUASIVE",
+    "토론": "DEBATE",
+    "소규모 (~10명)": "SMALL",
+    "중규모 (~50명)": "MEDIUM",
+    "대규모 (50명 이상)": "LARGE",
+    "일반 대중": "GENERAL",
+    "관련 지식 보유자": "KNOWLEDGEABLE",
+    "전문가": "EXPERT",
+  };
+
+  Future<void> _submitAll() async {
+    if (_selectedAtmosphere.isEmpty ||
+        _selectedPurpose.isEmpty ||
+        _selectedScale.isEmpty ||
+        _selectedAudience.isEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('모든 항목을 선택해주세요.')));
+      return;
+    }
+
+    final token = await getAccessToken();
+    final uri = Uri.parse('https://1d93-203-234-105-223.ngrok-free.app/api/scripts'); // ✅ 서버 주소
+
+    final body = {
+      "atmosphere": koreanToEnglish[_selectedAtmosphere],
+      "purpose": koreanToEnglish[_selectedPurpose],
+      "scale": koreanToEnglish[_selectedScale],
+      "audience": koreanToEnglish[_selectedAudience],
+      "deadline": _deadlineController.text.isNotEmpty
+          ? int.parse(_deadlineController.text)
+          : 0,
+      "script": widget.script,
+    };
+
+    try {
+      final response = await http.post(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => CoachingScriptFeedbackPage()),
+        );
+      } else {
+        _showErrorDialog('전송 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      _showErrorDialog('서버 요청 실패');
+    }
+  }
+
+  void _showErrorDialog(String msg) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('오류'),
+        content: Text(msg),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context), child: Text('확인')),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("메타정보 입력")),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          children: [
+            _buildDropdown('📌 분위기', ['공식적', '비공식적'], _selectedAtmosphere,
+                    (val) => setState(() => _selectedAtmosphere = val)),
+            _buildDropdown('🎯 목적', ['정보 전달', '보고', '설득', '토론'],
+                _selectedPurpose, (val) => setState(() => _selectedPurpose = val)),
+            _buildDropdown(
+                '👥 규모',
+                ['소규모 (~10명)', '중규모 (~50명)', '대규모 (50명 이상)'],
+                _selectedScale,
+                    (val) => setState(() => _selectedScale = val)),
+            _buildDropdown(
+                '🎓 청중 수준',
+                ['일반 대중', '관련 지식 보유자', '전문가'],
+                _selectedAudience,
+                    (val) => setState(() => _selectedAudience = val)),
+            _buildTextField('⏳ 제한 시간 (선택)', _deadlineController),
+            SizedBox(height: 20),
+            ElevatedButton(onPressed: _submitAll, child: Text("완료"))
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdown(
+      String label, List<String> items, String selected, ValueChanged<String> onChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
+        DropdownButton<String>(
+          value: selected.isEmpty ? null : selected,
+          hint: Text("선택하세요"),
+          isExpanded: true,
+          items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+          onChanged: (val) => onChanged(val!),
+        ),
+        SizedBox(height: 10),
+      ],
+    );
+  }
+
+  Widget _buildTextField(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
+        TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+              border: OutlineInputBorder(), hintText: "시간을 입력하세요 (예: 30)"),
+        ),
+        SizedBox(height: 10),
+      ],
+    );
+  }
+}
+
+
+class CoachingScriptFeedbackPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Text('CoachingScriptFeedbackPage 페이지'), // 빈 화면 (텍스트 없음)
+        ),
+      ),
+    );
+  }
+}
+/*class CoachingScriptFeedbackPage extends StatefulWidget {
   @override
   _CoachingScriptFeedPageState createState() => _CoachingScriptFeedPageState();
 }
 
 class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage>{
+  final AudioPlayer audioPlayer = AudioPlayer();
+  bool isPlaying = false;
+  Duration duration = Duration.zero;
+  Duration position = Duration.zero;
+
+  String originalStt = "";
+  String conclusion = "";
+  bool isLoading = true; // 데이터 로딩 상태
+  int score = 0;
+  List<String> topics = [];
+
   @override
-  Widget build(BuildContext context){
+  void initState() {
+    super.initState();
+    fetchTextAndFeedback(widget.scriptId); // 변환된 텍스트 & 피드백 가져오기
+
+    // 오디오 재생 상태 설정
+    audioPlayer.onDurationChanged.listen((Duration d) {
+      setState(() => duration = d);
+    });
+
+    audioPlayer.onPositionChanged.listen((Duration p) {
+      setState(() => position = p);
+    });
+
+    audioPlayer.onPlayerComplete.listen((_) {
+      if(mounted) {
+        setState(() {
+          isPlaying = false;
+          position = Duration.zero;
+        });
+      }
+    });
+  }
+
+  // 변환된 텍스트와 피드백 가져오기
+  Future<void> fetchTextAndFeedback(int speechBoardId) async {
+    try {
+      final accessToken = await getAccessToken();
+      final dio = Dio();
+      final response = await http.get(
+        Uri.parse(
+            "https://1d93-203-234-105-223.ngrok-free.app/api/speech-boards/$speechBoardId/feedback"),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken', // GET 요청에 Authorization 헤더 추가
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(utf8.decode(response.bodyBytes));
+
+        setState(() {
+          originalStt = data['data']['originalStt'] ?? "";
+          score = data['data']['score'] ?? 0;
+          conclusion = data['data']['conclusion'] ?? "";
+          topics = List<String>.from(data['data']['topics'] ?? []);
+          isLoading = false;
+        });
+      } else {
+        print("스피치 보드 데이터 가져오기 실패");
+        setState(() => isLoading = false);
+      }
+    } catch (e) {
+      print("오류 발생: $e");
+      setState(() => isLoading = false);
+    }
+  }
+
+  // 오디오 재생
+  Future<void> playAudio(int speechBoardId) async {
+    try {
+      final accessToken = await getAccessToken();
+      // 백엔드에서 GET 요청으로 record 데이터 받아오기
+      final response = await http.get(
+        Uri.parse(
+            "https://1d93-203-234-105-223.ngrok-free.app/api/speech-boards/$speechBoardId/record"),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken', // GET 요청에 Authorization 헤더 추가
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print("스피치 보드 오디오 데이터 받기 완료");
+        final data = json.decode(response.body);
+        final audioPath = data['data']; // 백엔드에서 반환하는 오디오 경로를 받음
+        String audioRecord = audioPath['record'];
+        // audioPlayer에 오디오 경로 설정
+        await audioPlayer.stop();
+        await audioPlayer.setSourceUrl(audioRecord);
+        await audioPlayer.resume();
+
+        setState(() {
+          isPlaying = true; //true가 맞나?
+        });
+      } else {
+        print("오디오 경로를 가져오는 데 실패했습니다.");
+      }
+    } catch (e) {
+      print("오디오 재생 오류: $e");
+    }
+  }
+
+
+  // 시간 포맷 변환 함수
+  String formatTime(Duration duration) {
+    int minutes = duration.inMinutes.remainder(60);
+    int seconds = duration.inSeconds.remainder(60);
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  @override //Stack의 position을 사용해서 녹음재생바 화면아래에 고정, 스크롤
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("스피치 스크립트"),
+      appBar: AppBar(
+        title: Text('스피치 피드백'),
         actions: [
           PopupMenuButton<String>(
             icon: Icon(Icons.search),
-            onSelected: (value){
-              print("$value선택");
+            onSelected: (value) {
+              print("$value 선택");
             },
-            itemBuilder: (BuildContext context){
+            itemBuilder: (BuildContext context) {
               return [
                 PopupMenuItem(value: '제목 수정', child: Text("제목 수정")),
                 PopupMenuItem(value: '텍스트 수정', child: Text("텍스트 수정")),
               ];
             },
           )
-        ]
-      ), //title값을 받아와서 넣기
-      body: Padding(
-        padding: EdgeInsets.all(10),
-        child: Container(
-          padding: EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(8),
+        ],
+      ),
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: isLoading
+                ? Center(child: CircularProgressIndicator()) // 데이터 로딩 중
+                : SingleChildScrollView(
+              padding: EdgeInsets.only(bottom: 80), // 오디오 컨트롤러 공간 확보
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("점수 : $score",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 16),
+
+                  // 변환된 텍스트
+                  Text("변환된 텍스트",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(originalStt, style: TextStyle(fontSize: 16)),
+                  ),
+
+                  SizedBox(height: 16),
+
+                  // 피드백
+                  Text("피드백",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.blue),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(conclusion, style: TextStyle(fontSize: 16)),
+                  ),
+                  SizedBox(height: 16), // 수정
+                ],
+              ),
+            ),
           ),
-          child: Text("피드백", style: TextStyle(fontSize: 16)), //피드백 받아오는 곳
-        ),
-      )
+
+          // 오디오 컨트롤러를 화면 하단에 고정
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              color: Colors.white,
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Slider(
+                    min: 0,
+                    max: duration.inSeconds.toDouble(),
+                    value: position.inSeconds.toDouble(),
+                    onChanged: (value) async {
+                      final newPosition = Duration(seconds: value.toInt());
+                      await audioPlayer.seek(newPosition);
+                      setState(() => position = newPosition);
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(formatTime(position)),
+                      IconButton(
+                        icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
+                        onPressed: () async {
+                          if (isPlaying) {
+                            await audioPlayer.pause();
+                          } else {
+                            if (duration == Duration.zero) {
+                              await playAudio(widget.scriptId);
+                            } else {
+                              await audioPlayer.resume();
+                            }
+                          }
+                          setState(() => isPlaying = !isPlaying);
+                        },
+                      ),
+                      Text(formatTime(duration)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
+
 }
+ */
 
 //녹음 기능 구현, 녹음 페이지
 class RecordingPage extends StatefulWidget {
@@ -2215,7 +2652,7 @@ class _RecordingPageState extends State<RecordingPage> {
       int deadline,
       String title,
       ) async {
-    final uri = 'https://1655-1-230-133-117.ngrok-free.app/api/speech-boards/record';
+    final uri = 'https://1d93-203-234-105-223.ngrok-free.app/api/speech-boards/record';
 
     // SharedPreferences에서 accessToken 가져오기
     final token = await getAccessToken();
@@ -2717,7 +3154,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
       final token = await getAccessToken();
       final response = await http.get(
         Uri.parse(
-            "https://1655-1-230-133-117.ngrok-free.app/api/speech-coachings/$speechCoachingId/feedback"),
+            "https://1d93-203-234-105-223.ngrok-free.app/api/speech-coachings/$speechCoachingId/feedback"),
           headers: {
             'Content-Type': 'application/json',
             //'Accept': 'application/json',
@@ -2750,7 +3187,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
       // 백엔드에서 GET 요청으로 record 데이터 받아오기
       final response = await http.get(
         Uri.parse(
-            "https://1655-1-230-133-117.ngrok-free.app/api/speech-coachings/$speechCoachingId/record"),
+            "https://1d93-203-234-105-223.ngrok-free.app/api/speech-coachings/$speechCoachingId/record"),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken', // GET 요청에 Authorization 헤더 추가
