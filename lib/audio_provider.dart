@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'audio_file.dart'; // 위에서 만든 모델 파일 import
+import 'dart:async';
+import 'audio_file.dart';
 
 class AudioProvider with ChangeNotifier {
   List<AudioFile> _audioFiles = [];
