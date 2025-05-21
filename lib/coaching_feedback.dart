@@ -41,7 +41,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
     try {
       final token = await getAccessToken();
       final response = await http.get(
-        Uri.parse("https://1d93-203-234-105-223.ngrok-free.app/api/speech-coachings/$id/feedback"),
+        Uri.parse("https://21b2-1-230-133-117.ngrok-free.app/api/speech-coachings/$id/feedback"),
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
@@ -64,7 +64,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
     try {
       final token = await getAccessToken();
       final response = await http.get(
-        Uri.parse("https://1d93-203-234-105-223.ngrok-free.app/api/speech-coachings/$id/record"),
+        Uri.parse("https://21b2-1-230-133-117.ngrok-free.app/api/speech-coachings/$id/record"),
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
@@ -238,7 +238,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
       final token = await getAccessToken();
       final response = await http.get(
           Uri.parse(
-              "https://1d93-203-234-105-223.ngrok-free.app/api/speech-coachings/$speechCoachingId/feedback"),
+              "https://21b2-1-230-133-117.ngrok-free.app/api/speech-coachings/$speechCoachingId/feedback"),
           headers: {
             'Content-Type': 'application/json',
             //'Accept': 'application/json',
@@ -271,7 +271,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
       // 백엔드에서 GET 요청으로 record 데이터 받아오기
       final response = await http.get(
         Uri.parse(
-            "https://1d93-203-234-105-223.ngrok-free.app/api/speech-coachings/$speechCoachingId/record"),
+            "https://21b2-1-230-133-117.ngrok-free.app/api/speech-coachings/$speechCoachingId/record"),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken', // GET 요청에 Authorization 헤더 추가

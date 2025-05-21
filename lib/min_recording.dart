@@ -92,10 +92,17 @@ class _minRecordingPageState extends State<minRecordingPage> {
 
   Future<void> _uploadRecording(int topicId) async {
     try {
-      await _stopRecording();
+      await _stopRecording(); // 안전하게 멈춤
       File file = File(_filePath);
-      final token = await getAccessToken();
 
+      print("📁 파일 존재: ${file.existsSync()}, 크기: ${file.existsSync() ? file.lengthSync() : 0} bytes");
+
+      if (!file.existsSync() || file.lengthSync() == 0) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('녹음 파일이 존재하지 않거나 비어 있습니다'), backgroundColor: Colors.red));
+        return;
+      }
+
+      final token = await getAccessToken();
       final url = Uri.parse('https://1655-1-230-133-117.ngrok-free.app/api/topics/$topicId/speech-coachings/record');
 
       var request = http.MultipartRequest('POST', url)
@@ -108,26 +115,26 @@ class _minRecordingPageState extends State<minRecordingPage> {
 
       var response = await request.send();
 
-      if (response.statusCode == 201) {
-        String responseBody = await response.stream.bytesToString();
-        final Map<String, dynamic> responseJson = json.decode(responseBody);
-        int speechCoachingId = responseJson['data']['speechCoachingId'];
+      String responseBody = await response.stream.bytesToString();
+      print("🔁 응답 코드: ${response.statusCode}");
+      print("📨 응답 본문: $responseBody");
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => CoachingFeedbackPage(speechCoachingId: speechCoachingId)),
-        );
+      if (response.statusCode == 201) {
+        final Map<String, dynamic> responseJson = json.decode(responseBody);
+        final id = responseJson['data']?['speechCoachingId'];
+        if (id != null) {
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => CoachingFeedbackPage(speechCoachingId: id)));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('응답 파싱 오류: ID 없음'), backgroundColor: Colors.red));
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('코칭 업로드 실패: ${response.statusCode}'), backgroundColor: Colors.red),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('업로드 실패: ${response.statusCode}'), backgroundColor: Colors.red));
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('코칭 업로드 중 오류: $e'), backgroundColor: Colors.red),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('에러 발생: $e'), backgroundColor: Colors.red));
     }
   }
+
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');

@@ -31,11 +31,9 @@ class _SpeechBoardPageState extends State<SpeechBoardPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8E8),
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        title: const Text('Speech Board', style: TextStyle(color: Colors.brown)),
-        iconTheme: const IconThemeData(color: Colors.brown),
+        backgroundColor: Colors.brown,
+        title: const Text('스피치 보드', style: TextStyle(color: Colors.white)),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: FutureBuilder<void>(
         future: _fetchAudioFuture,

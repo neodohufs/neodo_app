@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'coaching_feedback.dart';
 import 'coaching_script.dart';
+import 'coaching_script_feedback.dart';
 import 'get_access_token.dart';
 import 'min_recording.dart';
 
@@ -13,7 +14,9 @@ class CoachingPlanPage extends StatefulWidget {
 }
 
 class _CoachingPlanPage extends State<CoachingPlanPage> {
-  List fetchData = [];
+  List fetchTopicsData = [];
+  List fetchScriptsData = [];
+  bool showTopics = true;
 
   void selectedTopic(BuildContext context, List<Map<String, dynamic>> threeTopics) {
     showModalBottomSheet(
@@ -47,12 +50,13 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
   void initState() {
     super.initState();
     fetchTopics();
+    fetchScripts();
   }
 
   Future<void> fetchTopics() async {
     final accessToken = await getAccessToken();
     final response = await http.get(
-      Uri.parse("https://1d93-203-234-105-223.ngrok-free.app/api/speech-coachings"),
+      Uri.parse("https://21b2-1-230-133-117.ngrok-free.app/api/speech-coachings"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
@@ -62,10 +66,30 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
     if (response.statusCode == 200) {
       final jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
       setState(() {
-        fetchData = jsonResponse['data'];
+        fetchTopicsData = jsonResponse['data'];
       });
     } else {
       throw Exception('Failed to load topics');
+    }
+  }
+
+  Future<void> fetchScripts() async {
+    final accessToken = await getAccessToken();
+    final response = await http.get(
+      Uri.parse("https://21b2-1-230-133-117.ngrok-free.app/api/scripts"),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
+      setState(() {
+        fetchScriptsData = jsonResponse['data'];
+      });
+    } else {
+      throw Exception('Failed to load scripts');
     }
   }
 
@@ -81,6 +105,13 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
         MaterialPageRoute(builder: (context) => CoachingFeedbackPage(speechCoachingId: speechCoachingId)),
       );
     }
+  }
+
+  void _navigateToScriptDetail(int scriptId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CoachingScriptFeedbackPage(scriptId: scriptId)),
+    );
   }
 
   @override
@@ -108,73 +139,139 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('스피치 코칭', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.brown)),
-              const SizedBox(height: 5),
-              Text('3분 스피치', style: TextStyle(fontSize: 16, color: Colors.brown.shade300)),
-              const SizedBox(height: 10),
-              fetchData.isEmpty
-                  ? const Center(child: CircularProgressIndicator())
-                  : ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: fetchData.length,
-                itemBuilder: (context, index) {
-                  List<Map<String, dynamic>> topicList = List<Map<String, dynamic>>.from(fetchData[index]['topics']);
-
-                  return GestureDetector(
-                    onTap: () => selectedTopic(context, topicList),
-                    child: Card(
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      elevation: 4,
-                      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '신규 스피치 ${index + 1}',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.brown,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: topicList.map((topic) => Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.brown.shade50,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Text(
-                                    topic['topic'],
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.brown,
-                                    ),
-                                  ),
-                                ),
-                              )).toList(),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
+              Row(
+                children: [
+                  ChoiceChip(
+                    label: Text('3분 스피치'),
+                    selected: showTopics,
+                    showCheckmark: false,
+                    onSelected: (_) => setState(() => showTopics = true),
+                    selectedColor: Colors.brown.shade100,
+                    labelStyle: TextStyle(color: Colors.brown),
+                  ),
+                  const SizedBox(width: 10),
+                  ChoiceChip(
+                    label: Text('스피치 대본'),
+                    selected: !showTopics,
+                    showCheckmark: false,
+                    onSelected: (_) => setState(() => showTopics = false),
+                    selectedColor: Colors.brown.shade100,
+                    labelStyle: TextStyle(color: Colors.brown),
+                  ),
+                ],
               ),
+              const SizedBox(height: 20),
+              showTopics
+                  ? buildTopicList()
+                  : buildScriptList(),
             ],
           ),
         ),
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.brown,
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: '목록'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: '프로필'),
+        ],
+        onTap: (index) {
+          // TODO: Add navigation
+        },
+      ),
+    );
+  }
+
+  Widget buildTopicList() {
+    return fetchTopicsData.isEmpty
+        ? const Center(child: CircularProgressIndicator(
+      color: Colors.brown,
+    ))
+        : ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: fetchTopicsData.length,
+      itemBuilder: (context, index) {
+        List<Map<String, dynamic>> topicList = List<Map<String, dynamic>>.from(fetchTopicsData[index]['topics']);
+
+        return GestureDetector(
+          onTap: () => selectedTopic(context, topicList),
+          child: Card(
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            elevation: 4,
+            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '신규 스피치 ${index + 1}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.brown,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: topicList.map((topic) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.brown.shade50,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          topic['topic'],
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.brown,
+                          ),
+                        ),
+                      ),
+                    )).toList(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget buildScriptList() {
+    if (fetchScriptsData.isEmpty) {
+      return const Center(child: Text('등록된 스피치 대본이 없습니다.', style: TextStyle(color: Colors.brown)));
+    }
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: fetchScriptsData.length,
+      itemBuilder: (context, index) {
+        final script = fetchScriptsData[index];
+        final title = script['title'] ?? '(제목 없음)';
+        final createdAt = script['createdAt'] != null ? script['createdAt'].substring(0, 10) : '날짜 없음';
+        final scriptId = script['id'];
+        return Card(
+          color: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 3,
+          child: ListTile(
+            title: Text(title, style: TextStyle(color: Colors.brown)),
+            subtitle: Text('작성일: $createdAt', style: TextStyle(color: Colors.brown.shade300)),
+            onTap: () => _navigateToScriptDetail(scriptId),
+          ),
+        );
+      },
     );
   }
 }

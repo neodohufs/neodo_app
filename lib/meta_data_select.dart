@@ -19,6 +19,7 @@ class _MetadataSelectionPageState extends State<MetadataSelectionPage> {
   String _selectedScale = '';
   String _selectedAudience = '';
   final TextEditingController _deadlineController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
 
   Map<String, String> koreanToEnglish = {
     "공식적": "FORMAL",
@@ -39,15 +40,16 @@ class _MetadataSelectionPageState extends State<MetadataSelectionPage> {
     if (_selectedAtmosphere.isEmpty ||
         _selectedPurpose.isEmpty ||
         _selectedScale.isEmpty ||
-        _selectedAudience.isEmpty) {
+        _selectedAudience.isEmpty ||
+        _titleController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('모든 항목을 선택해주세요.')),
+        const SnackBar(content: Text('모든 항목을 입력해주세요.')),
       );
       return;
     }
 
     final token = await getAccessToken();
-    final uri = Uri.parse('https://1d93-203-234-105-223.ngrok-free.app/api/scripts');
+    final uri = Uri.parse('https://21b2-1-230-133-117.ngrok-free.app/api/scripts');
 
     final body = {
       "atmosphere": koreanToEnglish[_selectedAtmosphere],
@@ -58,6 +60,7 @@ class _MetadataSelectionPageState extends State<MetadataSelectionPage> {
           ? int.parse(_deadlineController.text)
           : 0,
       "script": widget.script,
+      "title": _titleController.text,
     };
 
     try {
@@ -115,6 +118,7 @@ class _MetadataSelectionPageState extends State<MetadataSelectionPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildTextField('📄 제목', _titleController, hint: "제목을 입력하세요"),
             _buildDropdown('📌 분위기', ['공식적', '비공식적'], _selectedAtmosphere,
                     (val) => setState(() => _selectedAtmosphere = val)),
             _buildDropdown('🎯 목적', ['정보 전달', '보고', '설득', '토론'],
@@ -123,7 +127,7 @@ class _MetadataSelectionPageState extends State<MetadataSelectionPage> {
                 _selectedScale, (val) => setState(() => _selectedScale = val)),
             _buildDropdown('🎓 청중 수준', ['일반 대중', '관련 지식 보유자', '전문가'],
                 _selectedAudience, (val) => setState(() => _selectedAudience = val)),
-            _buildTextField('⏳ 제한 시간 (선택)', _deadlineController),
+            _buildTextField('⏳ 제한 시간 (선택)', _deadlineController, hint: "시간을 입력하세요 (예: 30)", isNumber: true),
             const SizedBox(height: 20),
             Center(
               child: ElevatedButton(
@@ -172,7 +176,7 @@ class _MetadataSelectionPageState extends State<MetadataSelectionPage> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller) {
+  Widget _buildTextField(String label, TextEditingController controller, {String hint = '', bool isNumber = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(
@@ -182,9 +186,9 @@ class _MetadataSelectionPageState extends State<MetadataSelectionPage> {
           const SizedBox(height: 6),
           TextField(
             controller: controller,
-            keyboardType: TextInputType.number,
+            keyboardType: isNumber ? TextInputType.number : TextInputType.text,
             decoration: InputDecoration(
-              hintText: "시간을 입력하세요 (예: 30)",
+              hintText: hint,
               fillColor: Colors.white,
               filled: true,
               border: OutlineInputBorder(

@@ -45,7 +45,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
     try {
       final token = await getAccessToken();
       final response = await http.get(
-        Uri.parse("https://1d93-203-234-105-223.ngrok-free.app/api/speech-boards/$id/feedback"),
+        Uri.parse("https://21b2-1-230-133-117.ngrok-free.app/api/speech-boards/$id/feedback"),
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
@@ -69,7 +69,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
     try {
       final token = await getAccessToken();
       final response = await http.get(
-        Uri.parse("https://1d93-203-234-105-223.ngrok-free.app/api/speech-boards/$id/record"),
+        Uri.parse("https://21b2-1-230-133-117.ngrok-free.app/api/speech-boards/$id/record"),
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {

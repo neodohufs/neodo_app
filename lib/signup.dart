@@ -126,7 +126,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     try {
       final response = await http.post(
-        Uri.parse("https://1d93-203-234-105-223.ngrok-free.app/api/users/signup"),
+        Uri.parse("https://21b2-1-230-133-117.ngrok-free.app/api/users/signup"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({'username': username, 'email': email, 'password': password}),
       );
@@ -137,7 +137,7 @@ class _SignUpPageState extends State<SignUpPage> {
           MaterialPageRoute(builder: (_) => const LoginPage()),
         );
       } else {
-        _showErrorDialog(context, '회원가입 실패: ${response.body}');
+        _showErrorDialog(context, '회원가입 실패: ${response.statusCode}');
       }
     } catch (e) {
       _showErrorDialog(context, '서버 요청 중 오류 발생: $e');

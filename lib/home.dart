@@ -3,11 +3,13 @@ import 'package:file_picker/file_picker.dart';
 import 'package:http_parser/http_parser.dart';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:neodo/profile.dart';
 import 'package:neodo/recording.dart';
 import 'package:neodo/speech_board.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'coaching_plan.dart';
+import 'list.dart';
 import 'login.dart';
 import 'user.dart';
 import 'apiService.dart';
@@ -24,7 +26,7 @@ class _HomePageState extends State<HomePage> {
   GlobalKey<ScaffoldState>(); // GlobalKey 추가
   User? user;
   postFile(File file, String atmosphere, String purpose, String scale, String audience, int deadline, String title) async {
-    final uri = 'https://1d93-203-234-105-223.ngrok-free.app/api/speech-boards/record';
+    final uri = 'https://21b2-1-230-133-117.ngrok-free.app/api/speech-boards/record';
 
     // SharedPreferences에서 accessToken 가져오기
     final token = await getAccessToken();
@@ -434,6 +436,36 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.brown,
+        unselectedItemColor: Colors.grey,
+        currentIndex: 0, // 현재 선택된 탭 (예: 목록이 1번째 인덱스일 경우)
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: '목록'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: '프로필'),
+        ],
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => HomePage()), // 홈 페이지로 이동
+            );
+          } else if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const SpeechMenuPage()), // 목록 페이지
+            );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => ProfilePage()), // 프로필 페이지
+            );
+          }
+        },
+      ),
+
     );
   }
 
