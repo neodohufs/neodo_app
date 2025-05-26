@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'audio.dart';
+import '../audio.dart';
 import 'feedback.dart';
-import 'get_access_token.dart';
+import '../get_access_token.dart';
 
 class SpeechBoardPage extends StatefulWidget {
   @override

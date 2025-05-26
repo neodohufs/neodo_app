@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'get_access_token.dart';
+import '../get_access_token.dart';
 import 'package:http/http.dart' as http;
 
 class FeedbackPage extends StatefulWidget {
@@ -45,7 +45,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
     try {
       final token = await getAccessToken();
       final response = await http.get(
-        Uri.parse("https://21b2-1-230-133-117.ngrok-free.app/api/speech-boards/$id/feedback"),
+        Uri.parse("https://f8a2-1-230-133-117.ngrok-free.app/api/speech-boards/$id/feedback"),
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
@@ -69,7 +69,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
     try {
       final token = await getAccessToken();
       final response = await http.get(
-        Uri.parse("https://21b2-1-230-133-117.ngrok-free.app/api/speech-boards/$id/record"),
+        Uri.parse("https://f8a2-1-230-133-117.ngrok-free.app/api/speech-boards/$id/record"),
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
@@ -86,6 +86,35 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
   String formatTime(Duration d) => '${d.inMinutes}:${d.inSeconds.remainder(60).toString().padLeft(2, '0')}';
 
+  void _showEditOptions() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => Wrap(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.edit),
+            title: const Text("제목 수정"),
+            onTap: () {
+              Navigator.pop(context);
+              // TODO: 제목 수정 팝업 구현
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.edit_note),
+            title: const Text("내용 수정"),
+            onTap: () {
+              Navigator.pop(context);
+              // TODO: 내용 수정 팝업 구현
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,6 +123,12 @@ class _FeedbackPageState extends State<FeedbackPage> {
         backgroundColor: Colors.brown,
         title: const Text('스피치 피드백', style: TextStyle(color: Colors.white)),
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit, color: Colors.white),
+            onPressed: _showEditOptions,
+          ),
+        ],
       ),
       body: Stack(
         children: [

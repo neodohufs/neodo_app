@@ -46,6 +46,8 @@ dependencies:
   shared_preferences: ^2.5.2
   dart_jsonwebtoken: ^2.17.0
   record: ^6.0.0
+  waveform_flutter: ^1.2.0
+  flutter_audio_waveforms: ^1.2.1+8
 
 dev_dependencies:
   flutter_test:

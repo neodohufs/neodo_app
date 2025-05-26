@@ -3,10 +3,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 import 'coaching_feedback.dart';
-import 'coaching_script.dart';
-import 'coaching_script_feedback.dart';
-import 'get_access_token.dart';
-import 'min_recording.dart';
+import '../script/coaching_script.dart';
+import '../script/coaching_script_feedback.dart';
+import '../get_access_token.dart';
+import '../record/min_recording.dart';
 
 class CoachingPlanPage extends StatefulWidget {
   @override
@@ -56,7 +56,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
   Future<void> fetchTopics() async {
     final accessToken = await getAccessToken();
     final response = await http.get(
-      Uri.parse("https://21b2-1-230-133-117.ngrok-free.app/api/speech-coachings"),
+      Uri.parse("https://f8a2-1-230-133-117.ngrok-free.app/api/speech-coachings"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
@@ -76,7 +76,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
   Future<void> fetchScripts() async {
     final accessToken = await getAccessToken();
     final response = await http.get(
-      Uri.parse("https://21b2-1-230-133-117.ngrok-free.app/api/scripts"),
+      Uri.parse("https://f8a2-1-230-133-117.ngrok-free.app/api/scripts"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',

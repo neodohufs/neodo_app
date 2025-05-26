@@ -4,11 +4,11 @@ import 'package:http_parser/http_parser.dart';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:neodo/profile.dart';
-import 'package:neodo/recording.dart';
-import 'package:neodo/speech_board.dart';
+import 'package:neodo/record/recording.dart';
+import 'package:neodo/speech_board/speech_board.dart';
 import 'dart:convert';
 import 'dart:async';
-import 'coaching_plan.dart';
+import 'coaching_plan/coaching_plan.dart';
 import 'list.dart';
 import 'login.dart';
 import 'user.dart';
@@ -55,7 +55,8 @@ class _HomePageState extends State<HomePage> {
       FormData formData = FormData.fromMap({
         "record": await MultipartFile.fromFile(
           file.path,
-          filename: 'audio_${DateTime.now().millisecondsSinceEpoch}.m4a',
+          filename: '$title.m4a',
+          contentType: MediaType("audio", "mp4"), // 또는 aac
         ),
         "request": MultipartFile.fromString(
           jsonEncode(metadata),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
-import 'get_access_token.dart';
+import '../get_access_token.dart';
 
 class CoachingScriptFeedbackPage extends StatefulWidget {
   final int scriptId;
@@ -28,8 +28,9 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
     try {
       final token = await getAccessToken();
       final response = await http.get(
-        Uri.parse("https://21b2-1-230-133-117.ngrok-free.app/api/scripts/$scriptId"),
+        Uri.parse("https://f8a2-1-230-133-117.ngrok-free.app/api/scripts/$scriptId"),
         headers: {
+          'Content-type': 'application/json',
           'Authorization': 'Bearer $token',
         },
       );
@@ -37,7 +38,13 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
         setState(() {
           title = data['data']['title'] ?? "";
-          script = data['data']['script'] ?? "";
+          if (data['data']['editedScript'] != null) {
+            script = data['data']['editedScript'];
+            fetchScriptFeedback(scriptId, true);
+          } else {
+            script = data['data']['script'];
+            fetchScriptFeedback(scriptId, false);
+          }
           isLoading = false;
         });
       } else {
@@ -48,12 +55,14 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
     }
   }
 
-  Future<void> fetchScriptFeedback(int scriptId) async {
+  Future<void> fetchScriptFeedback(int scriptId, bool edited) async {
     try {
       final token = await getAccessToken();
+      final endpoint = edited ? 'edit-feedback' : 'feedback';
       final response = await http.get(
-        Uri.parse("https://21b2-1-230-133-117.ngrok-free.app//api/scripts/$scriptId/feedback"),
+        Uri.parse("https://f8a2-1-230-133-117.ngrok-free.app/api/scripts/$scriptId/$endpoint"),
         headers: {
+          'Content-type': 'application/json',
           'Authorization': 'Bearer $token',
         },
       );
@@ -61,14 +70,98 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
         setState(() {
           feedback = data['data']['feedback'] ?? "";
-          isLoading = false;
         });
-      } else {
-        setState(() => isLoading = false);
       }
     } catch (e) {
-      setState(() => isLoading = false);
+      print("에러 : $e");
     }
+  }
+
+  Future<void> updateScriptField(String field, String value) async {
+    try {
+      final token = await getAccessToken();
+      final response = await http.patch(
+        Uri.parse("https://f8a2-1-230-133-117.ngrok-free.app/api/scripts/${widget.scriptId}/edit-feedback"),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
+        body: jsonEncode({field: value}),
+      );
+
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("수정 실패")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("요청 중 오류 발생")),
+      );
+    }
+  }
+
+  void _showEditTitleDialog() {
+    TextEditingController _editTitleController = TextEditingController(text: title);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("제목 수정"),
+        content: TextField(
+          controller: _editTitleController,
+          decoration: const InputDecoration(hintText: "새 제목 입력"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("취소"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final newTitle = _editTitleController.text;
+              setState(() {
+                title = newTitle;
+              });
+              updateScriptField("title", newTitle);
+              Navigator.pop(context);
+            },
+            child: const Text("확인"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditContentDialog() {
+    TextEditingController _editContentController = TextEditingController(text: script);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("내용 수정"),
+        content: TextField(
+          controller: _editContentController,
+          decoration: const InputDecoration(hintText: "새 내용 입력"),
+          maxLines: null,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("취소"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final newScript = _editContentController.text;
+              setState(() {
+                script = newScript;
+              });
+              updateScriptField("script", newScript);
+              Navigator.pop(context);
+            },
+            child: const Text("확인"),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showEditOptions() {
@@ -77,28 +170,26 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) {
-        return Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text("제목 수정"),
-              onTap: () {
-                Navigator.pop(context);
-                // TODO: 제목 수정 페이지로 이동
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.edit_note),
-              title: const Text("내용 수정"),
-              onTap: () {
-                Navigator.pop(context);
-                // TODO: 내용 수정 페이지로 이동
-              },
-            ),
-          ],
-        );
-      },
+      builder: (context) => Wrap(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.edit),
+            title: const Text("제목 수정"),
+            onTap: () {
+              Navigator.pop(context);
+              _showEditTitleDialog();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.edit_note),
+            title: const Text("내용 수정"),
+            onTap: () {
+              Navigator.pop(context);
+              _showEditContentDialog();
+            },
+          ),
+        ],
+      ),
     );
   }
 

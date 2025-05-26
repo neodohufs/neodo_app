@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
-import 'coaching_script_feedback.dart';
-import 'get_access_token.dart';
+import '../script/coaching_script_feedback.dart';
+import '../get_access_token.dart';
+import 'dart:io';
+import 'package:dio/dio.dart';
+import 'package:http_parser/http_parser.dart';
 
-class MetadataSelectionPage extends StatefulWidget {
-  final String script;
-  const MetadataSelectionPage({super.key, required this.script});
+import '../home.dart';
+
+class RecordingMetaDataPage extends StatefulWidget {
+  final String filePath;
+  const RecordingMetaDataPage({super.key, required this.filePath});
 
   @override
-  _MetadataSelectionPageState createState() => _MetadataSelectionPageState();
+  _RecordingMetaDataPageState createState() => _RecordingMetaDataPageState();
 }
 
-class _MetadataSelectionPageState extends State<MetadataSelectionPage> {
+class _RecordingMetaDataPageState extends State<RecordingMetaDataPage> {
   String _selectedAtmosphere = '';
   String _selectedPurpose = '';
   String _selectedScale = '';
@@ -49,9 +53,14 @@ class _MetadataSelectionPageState extends State<MetadataSelectionPage> {
     }
 
     final token = await getAccessToken();
-    final uri = Uri.parse('https://21b2-1-230-133-117.ngrok-free.app/api/scripts');
+    final uri = 'https://f8a2-1-230-133-117.ngrok-free.app/api/speech-boards/record';
 
-    final body = {
+    final file = File(widget.filePath);
+    final dio = Dio();
+    String title = _titleController.text;
+    dio.options.headers['Authorization'] = 'Bearer $token';
+
+    final metadata = {
       "atmosphere": koreanToEnglish[_selectedAtmosphere],
       "purpose": koreanToEnglish[_selectedPurpose],
       "scale": koreanToEnglish[_selectedScale],
@@ -59,32 +68,35 @@ class _MetadataSelectionPageState extends State<MetadataSelectionPage> {
       "deadline": _deadlineController.text.isNotEmpty
           ? int.parse(_deadlineController.text)
           : 0,
-      "script": widget.script,
-      "title": _titleController.text,
     };
 
     try {
-      final response = await http.post(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(body),
-      );
+      final formData = FormData.fromMap({
+        "record": await MultipartFile.fromFile(
+          file.path,
+          filename: '$title.m4a',
+          contentType: MediaType("audio", "mp4"), // 또는 aac
+        ),
+        "request": MultipartFile.fromString(
+          jsonEncode(metadata),
+          contentType: MediaType("application", "json"),
+        ),
+      });
+
+      final response = await dio.post(uri, data: formData);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final jsonResponse = jsonDecode(response.body);
-        final scriptId = jsonResponse['data']['scriptEntityId'];
-        Navigator.pushReplacement(
+        print("meta data 넘기기 성공");
+        Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => CoachingScriptFeedbackPage(scriptId: scriptId)),
+          MaterialPageRoute(builder: (context) => HomePage()),
+              (route) => false,
         );
       } else {
-        _showErrorDialog('전송 실패: ${response.statusCode}');
+        _showErrorDialog("전송 실패: ${response.statusCode}");
       }
     } catch (e) {
-      _showErrorDialog('서버 요청 실패');
+      _showErrorDialog("서버 요청 실패: $e");
     }
   }
 

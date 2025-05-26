@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:neodo/profile.dart';
-import 'package:neodo/recording.dart';
-import 'coaching_plan.dart';
+import 'package:neodo/record/recording.dart';
+import 'coaching_plan/coaching_plan.dart';
 import 'home.dart';
-import 'speech_board.dart';
+import 'speech_board/speech_board.dart';
 
 class SpeechMenuPage extends StatelessWidget {
   const SpeechMenuPage({super.key});

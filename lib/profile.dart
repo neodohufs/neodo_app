@@ -27,20 +27,23 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> fetchUserProfile() async {
     final token = await getAccessToken();
-    final url = Uri.parse('https://forkcast.onrender.com/user/health');
+    final url = Uri.parse('https://f8a2-1-230-133-117.ngrok-free.app/api/users/my-page');
 
     try {
       final response = await http.get(
         url,
-        headers: {'Authorization': 'Bearer $token'},
+        headers: {
+          'Content-type': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
       );
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         if (decoded is List && decoded.isNotEmpty) {
           setState(() {
-            userName = decoded[0]['user']['name'] ?? '';
-            userEmail = decoded[0]['user']['email'] ?? '';
+            userName = decoded[0]['data']['username'] ?? '';
+            userEmail = decoded[0]['data']['email'] ?? '';
             isLoading = false;
           });
         }

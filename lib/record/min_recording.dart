@@ -7,8 +7,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'dart:convert';
 import 'dart:async';
-import 'coaching_feedback.dart';
-import 'get_access_token.dart';
+import '../coaching_plan/coaching_feedback.dart';
+import '../get_access_token.dart';
 
 class minRecordingPage extends StatefulWidget {
   final int topicId;
@@ -103,7 +103,7 @@ class _minRecordingPageState extends State<minRecordingPage> {
       }
 
       final token = await getAccessToken();
-      final url = Uri.parse('https://1655-1-230-133-117.ngrok-free.app/api/topics/$topicId/speech-coachings/record');
+      final url = Uri.parse('https://f8a2-1-230-133-117.ngrok-free.app/api/topics/$topicId/speech-coachings/record');
 
       var request = http.MultipartRequest('POST', url)
         ..headers['Authorization'] = 'Bearer $token'

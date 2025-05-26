@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'coaching_plan.dart';
-import 'meta_data_select.dart';
+import '../coaching_plan/coaching_plan.dart';
+import '../meta_data/script_meta_data.dart';
 
 class CoachingScriptWritePage extends StatefulWidget {
   @override
@@ -24,7 +24,7 @@ class _CoachingScriptPageState extends State<CoachingScriptWritePage> {
     }
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => MetadataSelectionPage(script: scriptText)),
+      MaterialPageRoute(builder: (context) => ScriptMetaDataPage(script: scriptText)),
     );
   }
 
