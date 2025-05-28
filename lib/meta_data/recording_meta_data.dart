@@ -74,7 +74,7 @@ class _RecordingMetaDataPageState extends State<RecordingMetaDataPage> {
       final formData = FormData.fromMap({
         "record": await MultipartFile.fromFile(
           file.path,
-          filename: '$title.m4a',
+          filename: title,
           contentType: MediaType("audio", "mp4"), // 또는 aac
         ),
         "request": MultipartFile.fromString(

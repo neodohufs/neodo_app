@@ -91,6 +91,9 @@ class _FeedbackPageState extends State<FeedbackPage> {
           topics = List<String>.from(data['data']['topics'] ?? []);
         });
       }
+      else{
+        print("스피치 보드 피드백 : ${response.statusCode}");
+      }
     } catch (e) {
       print("[fetchTextAndFeedback] 예외 발생: $e");
     }

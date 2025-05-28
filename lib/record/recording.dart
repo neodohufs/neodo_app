@@ -1,69 +1,56 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_sound/flutter_sound.dart';
+import 'package:neodo/record/sound_wave_painter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import '../meta_data/recording_meta_data.dart';
 
-class SoundWavePainter extends CustomPainter {
-  final double soundLevel;
-  double smoothedSoundLevel = 0.0;
-
-  SoundWavePainter(this.soundLevel);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.brown
-      ..style = PaintingStyle.fill;
-
-    final barCount = 50;
-    final barWidth = 5.0;
-    final spacing = 2.0;
-    final maxHeight = size.height;
-    final minHeight = 8.0;
-    final cornerRadius = Radius.circular(3.0);
-    final random = Random();
-
-    smoothedSoundLevel = smoothedSoundLevel * 0.3 + soundLevel * 0.7;
-
-    for (int i = 0; i < barCount; i++) {
-      final randomFactor = 0.8 + random.nextDouble() * 0.4;
-      final barHeight = max(minHeight, smoothedSoundLevel * maxHeight * randomFactor);
-      final x = i * (barWidth + spacing);
-      final y = (size.height - barHeight) / 2;
-
-      final rRect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(x, y, barWidth, barHeight),
-        cornerRadius,
-      );
-
-      canvas.drawRRect(rRect, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
+// 🟫 녹음 페이지
 class RecordingPage extends StatefulWidget {
   @override
   _RecordingPageState createState() => _RecordingPageState();
 }
 
-class _RecordingPageState extends State<RecordingPage> {
+class _RecordingPageState extends State<RecordingPage> with SingleTickerProviderStateMixin {
   final FlutterSoundRecorder _recorder = FlutterSoundRecorder();
   bool _isRecording = false;
   bool _isPaused = false;
   double _soundLevel = 0.0;
+  double _smoothedLevel = 0.0;
   StreamSubscription? _dbSubscription;
   String? _filePath;
 
   Duration _recordingDuration = Duration.zero;
   Timer? _timer;
+  late Ticker _ticker;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _ticker = createTicker((_) {
+      setState(() {
+        // smoothing for better wave animation
+        _smoothedLevel = _smoothedLevel * 0.3 + _soundLevel * 0.7;
+      });
+    })..start();
+  }
+
+  @override
+  void dispose() {
+    _ticker.dispose();
+    _timer?.cancel();
+    _dbSubscription?.cancel();
+    _recorder.closeRecorder();
+    super.dispose();
+  }
 
   Future<void> _startRecording() async {
+    if (_isRecording) return;
+
     final status = await Permission.microphone.request();
     if (!status.isGranted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -84,14 +71,15 @@ class _RecordingPageState extends State<RecordingPage> {
       sampleRate: 44100,
     );
 
+    _dbSubscription?.cancel();
     _dbSubscription = _recorder.onProgress!.listen((event) {
       final db = event.decibels ?? -60;
-      setState(() {
-        _soundLevel = ((db + 60) / 60).clamp(0.0, 1.0);
-      });
+      _soundLevel = ((db + 60) / 60).clamp(0.0, 1.0); // smoothing은 Ticker에서 처리
     });
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _recordingDuration = Duration.zero;
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       setState(() {
         _recordingDuration += const Duration(seconds: 1);
       });
@@ -104,9 +92,11 @@ class _RecordingPageState extends State<RecordingPage> {
   }
 
   Future<void> _pauseResume() async {
+    if (!_isRecording) return;
+
     if (_isPaused) {
       await _recorder.resumeRecorder();
-      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) {
         setState(() {
           _recordingDuration += const Duration(seconds: 1);
         });
@@ -122,12 +112,17 @@ class _RecordingPageState extends State<RecordingPage> {
   }
 
   Future<void> _stopRecording() async {
+    if (!_isRecording) return;
+
     await _recorder.stopRecorder();
     await _recorder.closeRecorder();
     _dbSubscription?.cancel();
     _timer?.cancel();
 
-    setState(() => _isRecording = false);
+    setState(() {
+      _isRecording = false;
+      _isPaused = false;
+    });
 
     if (_filePath != null) {
       Navigator.pushReplacement(
@@ -169,7 +164,7 @@ class _RecordingPageState extends State<RecordingPage> {
           Expanded(
             child: Center(
               child: CustomPaint(
-                painter: SoundWavePainter(_soundLevel),
+                painter: OptimizedWavePainter(_smoothedLevel),  // ✅ CustomPainter 객체 전달
                 size: Size(MediaQuery.of(context).size.width, 140),
               ),
             ),
