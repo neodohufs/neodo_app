@@ -11,6 +11,7 @@ import 'dart:async';
 import 'coaching_plan/coaching_plan.dart';
 import 'list.dart';
 import 'login.dart';
+import 'meta_data/recording_meta_data.dart';
 import 'user.dart';
 import 'apiService.dart';
 import 'get_access_token.dart';
@@ -26,7 +27,7 @@ class _HomePageState extends State<HomePage> {
   GlobalKey<ScaffoldState>(); // GlobalKey 추가
   User? user;
   postFile(File file, String atmosphere, String purpose, String scale, String audience, int deadline, String title) async {
-    final uri = 'https://21b2-1-230-133-117.ngrok-free.app/api/speech-boards/record';
+    final uri = 'https://dfd7-119-197-110-182.ngrok-free.app/api/speech-boards/record';
 
     // SharedPreferences에서 accessToken 가져오기
     final token = await getAccessToken();
@@ -84,143 +85,15 @@ class _HomePageState extends State<HomePage> {
     if (result != null) {
       File file = File(result.files.single.path!);
       print('📂 선택된 파일 경로: ${file.path}');
-      _showCompletionDialog(file);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RecordingMetaDataPage(filePath: file.path),
+        ),
+      );
 
     } else {
       print("파일 선택이 취소되었습니다.");
-    }
-  }
-
-  Map<String, String> koreanToEnglish = {
-    "공식적": "FORMAL",
-    "비공식적": "INFORMAL",
-    "정보 전달": "INFORMATIVE",
-    "보고": "REPORTING",
-    "설득": "PERSUASIVE",
-    "토론": "DEBATE",
-    "소규모 (~10명)": "SMALL",
-    "중규모 (~50명)": "MEDIUM",
-    "대규모 (50명 이상)": "LARGE",
-    "일반 대중": "GENERAL",
-    "관련 지식 보유자": "KNOWLEDGEABLE",
-    "전문가": "EXPERT",
-  };
-
-  String _selectedAtmosphere = ''; // 분위기
-  String _selectedPurpose = ''; // 목적
-  String _selectedScale = ''; // 규모
-  String _selectedAudience = ''; // 청중 수준
-  TextEditingController _timeLimitController =
-  TextEditingController(); // 제한 시간 입력
-  TextEditingController _titleController = TextEditingController();
-
-  void _showCompletionDialog(File file) {
-    if (context.mounted) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            title: Column(
-              children: [
-                Container(
-                  height: 5,
-                  width: double.infinity,
-                  color: Colors.black, // 상단 강조선
-                ),
-                SizedBox(height: 10),
-                Text('발표 종류',
-                    style: TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold)),
-              ],
-            ),
-            content: SingleChildScrollView(
-              child: Container(
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black, width: 1.5),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    _buildTitleTextField('제목', _titleController),
-                    _buildDropdown(
-                        '📌 분위기', ['공식적', '비공식적'], _selectedAtmosphere,
-                            (val) {
-                          setState(() => _selectedAtmosphere = val);
-                        }),
-                    _buildDropdown(
-                        '🎯 목적', ['정보 전달', '보고', '설득', '토론'], _selectedPurpose,
-                            (val) {
-                          setState(() => _selectedPurpose = val);
-                        }),
-                    _buildDropdown(
-                        '👥 규모',
-                        ['소규모 (~10명)', '중규모 (~50명)', '대규모 (50명 이상)'],
-                        _selectedScale, (val) {
-                      setState(() => _selectedScale = val);
-                    }),
-                    _buildDropdown('🎓 청중 수준', ['일반 대중', '관련 지식 보유자', '전문가'],
-                        _selectedAudience, (val) {
-                          setState(() => _selectedAudience = val);
-                        }),
-                    _buildTextField('⏳ 제한 시간 (선택)', _timeLimitController),
-                  ],
-                ),
-              ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () async {
-                  if (_selectedAtmosphere.isNotEmpty &&
-                      _selectedPurpose.isNotEmpty &&
-                      _selectedScale.isNotEmpty &&
-                      _selectedAudience.isNotEmpty) {
-                    String atmosphereEng = koreanToEnglish[_selectedAtmosphere] ?? _selectedAtmosphere;
-                    String purposeEng = koreanToEnglish[_selectedPurpose] ?? _selectedPurpose;
-                    String scaleEng = koreanToEnglish[_selectedScale] ?? _selectedScale;
-                    String audienceEng = koreanToEnglish[_selectedAudience] ?? _selectedAudience;
-
-                    await postFile(
-                      file,
-                      atmosphereEng,
-                      purposeEng,
-                      scaleEng,
-                      audienceEng,
-                      _timeLimitController.text.isNotEmpty
-                          ? int.parse(_timeLimitController.text)
-                          : 0,
-                      _titleController.text,
-                    );
-
-                    if (mounted) {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => HomePage()),
-                            (Route<dynamic> route) => false, // 모든 기존 페이지 제거
-                      );
-                    }
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('모든 항목을 선택해주세요.')),
-                    );
-                  }
-                },
-                child: Text(
-                  '확인',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      );
     }
   }
 
@@ -288,19 +161,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // 녹음 완료 후 카테고리와 함께 처리하는 함수
-  void _completeRecording(File file, String atmosphere, String purpose, String scale, String audience, int deadline) {
-    String title = _titleController.text;
-
-    // 선택된 카테고리와 함께 녹음을 완료하는 처리
-    print('제목: $title');
-    print('분위기: $_selectedAtmosphere');
-    print('목적: $_selectedPurpose');
-    print('규모: $_selectedScale');
-    print('청중 수준: $_selectedAudience');
-    print('제한 시간: $deadline');
-    print('파일: $file');
-  }
   @override
   void initState() {
     super.initState();
@@ -461,7 +321,7 @@ class _HomePageState extends State<HomePage> {
           } else if (index == 2) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => ProfilePage()), // 프로필 페이지
+              MaterialPageRoute(builder: (_) => const ProfilePage()), // 프로필 페이지
             );
           }
         },

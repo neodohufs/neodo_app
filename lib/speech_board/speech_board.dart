@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../audio.dart';
+import '../home.dart';
+import '../list.dart';
+import '../profile.dart';
 import 'feedback.dart';
 import '../get_access_token.dart';
 
@@ -103,13 +106,29 @@ class _SpeechBoardPageState extends State<SpeechBoardPage> {
         backgroundColor: Colors.white,
         selectedItemColor: Colors.brown,
         unselectedItemColor: Colors.grey,
+        currentIndex: 0, // 현재 선택된 탭 (예: 목록이 1번째 인덱스일 경우)
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
           BottomNavigationBarItem(icon: Icon(Icons.list), label: '목록'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: '프로필'),
         ],
         onTap: (index) {
-          // TODO: Add navigation
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => HomePage()), // 홈 페이지로 이동
+            );
+          } else if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const SpeechMenuPage()), // 목록 페이지
+            );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => ProfilePage()), // 프로필 페이지
+            );
+          }
         },
       ),
     );

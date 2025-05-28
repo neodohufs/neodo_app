@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'get_access_token.dart';
 import 'home.dart';
 import 'package:http/http.dart' as http;
+import 'list.dart';
 import 'onBoarding.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -27,7 +28,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> fetchUserProfile() async {
     final token = await getAccessToken();
-    final url = Uri.parse('https://f8a2-1-230-133-117.ngrok-free.app/api/users/my-page');
+    final url = Uri.parse('https://dfd7-119-197-110-182.ngrok-free.app/api/users/my-page');
 
     try {
       final response = await http.get(
@@ -38,14 +39,21 @@ class _ProfilePageState extends State<ProfilePage> {
         },
       );
 
+      print("[fetchUserProfile] 상태코드: ${response.statusCode}");
+      print("[fetchUserProfile] 응답본문: ${response.body}");
+
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        if (decoded is List && decoded.isNotEmpty) {
+
+        if (decoded is Map && decoded['data'] != null) {
           setState(() {
-            userName = decoded[0]['data']['username'] ?? '';
-            userEmail = decoded[0]['data']['email'] ?? '';
+            userName = decoded['data']['username'] ?? '';
+            userEmail = decoded['data']['email'] ?? '';
             isLoading = false;
           });
+        } else {
+          print("[fetchUserProfile] 응답 형식이 예상과 다름");
+          setState(() => isLoading = false);
         }
       } else {
         print("프로필 불러오기 실패: ${response.statusCode}");
@@ -74,6 +82,7 @@ class _ProfilePageState extends State<ProfilePage> {
       backgroundColor: const Color(0xFFFFF8E8),
       appBar: AppBar(
         backgroundColor: Colors.brown,
+        automaticallyImplyLeading: false,
         title: const Text('프로필', style: TextStyle(color: Colors.white)),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -142,11 +151,14 @@ class _ProfilePageState extends State<ProfilePage> {
               MaterialPageRoute(builder: (_) => HomePage()),
             );
           } else if (index == 1) {
-            // TODO: 목록 페이지로 이동 시 추가
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => SpeechMenuPage()),
+            );
           } else if (index == 2) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => const ProfilePage()),
+              MaterialPageRoute(builder: (_) => ProfilePage()),
             );
           }
         },

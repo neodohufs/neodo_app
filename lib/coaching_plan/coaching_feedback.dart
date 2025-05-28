@@ -22,6 +22,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
 
   String originalStt = "";
   String conclusion = "";
+  String feedbackTitle = "";
   bool isLoading = true;
   int score = 0;
 
@@ -34,7 +35,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
     fetchAndPrepareAudio(widget.speechCoachingId);
     audioPlayer.onDurationChanged.listen((Duration d) => setState(() => duration = d));
     audioPlayer.onPositionChanged.listen((Duration p) => setState(() => position = p));
-    audioPlayer.onPlayerComplete.listen((_){
+    audioPlayer.onPlayerComplete.listen((_) {
       setState(() {
         isPlaying = false;
         position = Duration.zero;
@@ -46,30 +47,32 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
     try {
       final token = await getAccessToken();
       final response = await http.get(
-        Uri.parse("https://f8a2-1-230-133-117.ngrok-free.app/api/speech-coachings/$id/record"),
+        Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/speech-coachings/$id/record"),
         headers: {'Authorization': 'Bearer $token'},
       );
-      if(response.statusCode == 200) {
+      if (response.statusCode == 200) {
         final data = json.decode(response.body);
         audioUrl = data['data']['record'];
         await audioPlayer.setSourceUrl(audioUrl!);
       } else {
         print("오디오 URL 로딩 실패");
       }
-    } catch(e) {
+    } catch (e) {
       print("오디오 URL 준비 오류: $e");
     }
   }
+
   Future<void> fetchTextAndFeedback(int id) async {
     try {
       final token = await getAccessToken();
       final response = await http.get(
-        Uri.parse("https://f8a2-1-230-133-117.ngrok-free.app/api/speech-coachings/$id/feedback"),
+        Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/speech-coachings/$id/feedback"),
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
+          feedbackTitle = data['data']['title'] ?? "";
           originalStt = data['data']['originalStt'] ?? "";
           score = data['data']['score'] ?? 0;
           conclusion = data['data']['conclusion'] ?? "";
@@ -83,6 +86,108 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
     }
   }
 
+  Future<void> updateFeedbackField(String field, String value, String api) async {
+    try {
+      final token = await getAccessToken();
+      final response = await http.patch(
+        Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/speech-coachings/${widget.speechCoachingId}/$api"),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
+        body: jsonEncode({field: value}),
+      );
+
+      if (response.statusCode != 200) {
+        print("수정 실패: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("요청 중 오류 발생: $e");
+    }
+  }
+
+  void _showEditTitleDialog() {
+    TextEditingController _editTitleController = TextEditingController(text: feedbackTitle);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("제목 수정"),
+        content: TextField(
+          controller: _editTitleController,
+          decoration: const InputDecoration(hintText: "새 제목 입력"),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("취소")),
+          ElevatedButton(
+            onPressed: () {
+              final newTitle = _editTitleController.text;
+              setState(() => feedbackTitle = newTitle);
+              updateFeedbackField("title", newTitle, "title");
+              Navigator.pop(context);
+            },
+            child: const Text("확인"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditContentDialog() {
+    TextEditingController _editContentController = TextEditingController(text: originalStt);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("내용 수정"),
+        content: TextField(
+          controller: _editContentController,
+          decoration: const InputDecoration(hintText: "새 내용 입력"),
+          maxLines: null,
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("취소")),
+          ElevatedButton(
+            onPressed: () {
+              final newContent = _editContentController.text;
+              setState(() => originalStt = newContent);
+              updateFeedbackField("originalStt", newContent, "text");
+              Navigator.pop(context);
+            },
+            child: const Text("확인"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditOptions() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => Wrap(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.edit),
+            title: const Text("제목 수정"),
+            onTap: () {
+              Navigator.pop(context);
+              _showEditTitleDialog();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.edit_note),
+            title: const Text("내용 수정"),
+            onTap: () {
+              Navigator.pop(context);
+              _showEditContentDialog();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   String formatTime(Duration d) => '${d.inMinutes}:${d.inSeconds.remainder(60).toString().padLeft(2, '0')}';
 
   @override
@@ -93,6 +198,9 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
         backgroundColor: Colors.brown,
         title: const Text('스피치코칭 피드백', style: TextStyle(color: Colors.white)),
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(icon: const Icon(Icons.edit), onPressed: _showEditOptions)
+        ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -105,13 +213,14 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text("제목: $feedbackTitle",
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.brown)),
+                  const SizedBox(height: 16),
                   Text("점수 : $score",
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
                   const SizedBox(height: 16),
                   const Text("변환된 텍스트",
-                      style: TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -124,8 +233,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
                   ),
                   const SizedBox(height: 16),
                   const Text("피드백",
-                      style: TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -177,6 +285,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
                           } else {
                             await audioPlayer.resume();
                           }
+                          setState(() => isPlaying = !isPlaying);
                         },
                       ),
                       Text(formatTime(duration), style: const TextStyle(color: Colors.brown)),

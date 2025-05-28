@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
+import '../home.dart';
+import '../list.dart';
+import '../profile.dart';
 import 'coaching_feedback.dart';
 import '../script/coaching_script.dart';
 import '../script/coaching_script_feedback.dart';
@@ -56,7 +59,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
   Future<void> fetchTopics() async {
     final accessToken = await getAccessToken();
     final response = await http.get(
-      Uri.parse("https://f8a2-1-230-133-117.ngrok-free.app/api/speech-coachings"),
+      Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/speech-coachings"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
@@ -76,7 +79,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
   Future<void> fetchScripts() async {
     final accessToken = await getAccessToken();
     final response = await http.get(
-      Uri.parse("https://f8a2-1-230-133-117.ngrok-free.app/api/scripts"),
+      Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/scripts"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
@@ -131,7 +134,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
           );
         },
         backgroundColor: Colors.brown,
-        child: const Icon(Icons.add, size: 32),
+        child: const Icon(Icons.add, color: Colors.white, size: 32),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -172,29 +175,54 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
         backgroundColor: Colors.white,
         selectedItemColor: Colors.brown,
         unselectedItemColor: Colors.grey,
+        currentIndex: 0, // 현재 선택된 탭 (예: 목록이 1번째 인덱스일 경우)
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
           BottomNavigationBarItem(icon: Icon(Icons.list), label: '목록'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: '프로필'),
         ],
         onTap: (index) {
-          // TODO: Add navigation
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => HomePage()), // 홈 페이지로 이동
+            );
+          } else if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const SpeechMenuPage()), // 목록 페이지
+            );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => ProfilePage()), // 프로필 페이지
+            );
+          }
         },
       ),
     );
   }
 
   Widget buildTopicList() {
-    return fetchTopicsData.isEmpty
-        ? const Center(child: CircularProgressIndicator(
-      color: Colors.brown,
-    ))
-        : ListView.builder(
+    if (fetchTopicsData.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.only(top: 40),
+          child: Text(
+            '스피치 보드에 녹음을 추가하세요',
+            style: TextStyle(color: Colors.brown, fontSize: 16),
+          ),
+        ),
+      );
+    }
+
+    return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: fetchTopicsData.length,
       itemBuilder: (context, index) {
-        List<Map<String, dynamic>> topicList = List<Map<String, dynamic>>.from(fetchTopicsData[index]['topics']);
+        List<Map<String, dynamic>> topicList =
+        List<Map<String, dynamic>>.from(fetchTopicsData[index]['topics']);
 
         return GestureDetector(
           onTap: () => selectedTopic(context, topicList),

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import '../coaching_plan/coaching_plan.dart';
 import '../meta_data/script_meta_data.dart';
 
 class CoachingScriptWritePage extends StatefulWidget {
   @override
-  _CoachingScriptPageState createState() => _CoachingScriptPageState();
+  _CoachingScriptWritePageState createState() => _CoachingScriptWritePageState();
 }
 
-class _CoachingScriptPageState extends State<CoachingScriptWritePage> {
+class _CoachingScriptWritePageState extends State<CoachingScriptWritePage> {
   final TextEditingController _controller = TextEditingController();
 
   void _submitScript() {
@@ -22,9 +21,12 @@ class _CoachingScriptPageState extends State<CoachingScriptWritePage> {
       );
       return;
     }
+
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => ScriptMetaDataPage(script: scriptText)),
+      MaterialPageRoute(
+        builder: (context) => ScriptMetaDataPage(script: scriptText),
+      ),
     );
   }
 
@@ -53,14 +55,12 @@ class _CoachingScriptPageState extends State<CoachingScriptWritePage> {
             const SizedBox(height: 12),
             TextField(
               controller: _controller,
-              maxLines: 25,
-              keyboardType: TextInputType.multiline,
-              textInputAction: TextInputAction.newline,
+              maxLines: 20,
               decoration: InputDecoration(
                 hintText: "스피치 대본을 입력하세요",
-                hintStyle: const TextStyle(color: Colors.brown),
                 filled: true,
                 fillColor: Colors.white,
+                hintStyle: const TextStyle(color: Colors.brown),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(color: Colors.brown),
@@ -72,44 +72,23 @@ class _CoachingScriptPageState extends State<CoachingScriptWritePage> {
               ),
               cursorColor: Colors.brown,
             ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.brown,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: Colors.brown),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => CoachingPlanPage()),
-                      );
-                    },
-                    child: const Text("취소"),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.center,
+              child: ElevatedButton(
+                onPressed: _submitScript,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.brown,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.brown,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: _submitScript,
-                    child: const Text("완료"),
-                  ),
-                ),
-              ],
+                child: const Text("대본 저장"),
+              ),
             ),
+            const SizedBox(height: 24),
           ],
         ),
       ),

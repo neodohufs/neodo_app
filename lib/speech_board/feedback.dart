@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../get_access_token.dart';
 import 'package:http/http.dart' as http;
@@ -21,14 +20,15 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
   String originalStt = "";
   String conclusion = "";
-  bool isLoading = true;
   int score = 0;
+  String title = "";
   List<String> topics = [];
+
+  bool isFullLoading = true;
 
   @override
   void initState() {
     super.initState();
-    fetchTextAndFeedback(widget.speechBoardId);
     audioPlayer.onDurationChanged.listen((d) => setState(() => duration = d));
     audioPlayer.onPositionChanged.listen((p) => setState(() => position = p));
     audioPlayer.onPlayerComplete.listen((_) {
@@ -39,13 +39,47 @@ class _FeedbackPageState extends State<FeedbackPage> {
         });
       }
     });
+    loadAllData();
+  }
+
+  Future<void> loadAllData() async {
+    setState(() => isFullLoading = true);
+    try {
+      await Future.wait([
+        fetchTextAndFeedback(widget.speechBoardId),
+        fetchTitle(widget.speechBoardId),
+        fetchAndPrepareAudio(widget.speechBoardId),
+      ]);
+    } catch (e) {
+      print("[loadAllData] 예외 발생: $e");
+    } finally {
+      if (mounted) setState(() => isFullLoading = false);
+    }
+  }
+
+  Future<void> fetchAndPrepareAudio(int id) async {
+    try {
+      final token = await getAccessToken();
+      final response = await http.get(
+        Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/speech-boards/$id/record"),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 200) {
+        final audioRecord = json.decode(response.body)['data']['record'];
+        await audioPlayer.setSourceUrl(audioRecord);
+      } else {
+        print("[fetchAndPrepareAudio] 실패: 상태 코드 ${response.statusCode}");
+      }
+    } catch (e) {
+      print("[fetchAndPrepareAudio] 예외 발생: $e");
+    }
   }
 
   Future<void> fetchTextAndFeedback(int id) async {
     try {
       final token = await getAccessToken();
       final response = await http.get(
-        Uri.parse("https://f8a2-1-230-133-117.ngrok-free.app/api/speech-boards/$id/feedback"),
+        Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/speech-boards/$id/feedback"),
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
@@ -55,36 +89,88 @@ class _FeedbackPageState extends State<FeedbackPage> {
           score = data['data']['score'] ?? 0;
           conclusion = data['data']['conclusion'] ?? "";
           topics = List<String>.from(data['data']['topics'] ?? []);
-          isLoading = false;
         });
-      } else {
-        setState(() => isLoading = false);
       }
     } catch (e) {
-      setState(() => isLoading = false);
+      print("[fetchTextAndFeedback] 예외 발생: $e");
+    }
+  }
+
+  Future<void> fetchTitle(int id) async {
+    try {
+      final token = await getAccessToken();
+      final response = await http.get(
+        Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/speech-boards/$id/record"),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(utf8.decode(response.bodyBytes));
+        setState(() => title = data['data']['title']);
+      }
+    } catch (e) {
+      print("[fetchTitle] 예외 발생: $e");
     }
   }
 
   Future<void> playAudio(int id) async {
     try {
-      final token = await getAccessToken();
-      final response = await http.get(
-        Uri.parse("https://f8a2-1-230-133-117.ngrok-free.app/api/speech-boards/$id/record"),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-      if (response.statusCode == 200) {
-        final audioRecord = json.decode(response.body)['data']['record'];
-        await audioPlayer.stop();
-        await audioPlayer.setSourceUrl(audioRecord);
-        await audioPlayer.resume();
-        setState(() => isPlaying = true);
-      }
+      await audioPlayer.resume();
+      setState(() => isPlaying = true);
     } catch (e) {
-      print("오디오 재생 오류: $e");
+      print("[playAudio] 예외 발생: $e");
     }
   }
 
-  String formatTime(Duration d) => '${d.inMinutes}:${d.inSeconds.remainder(60).toString().padLeft(2, '0')}';
+  void _showEditTitleDialog() {
+    TextEditingController editingTitleController = TextEditingController(text: title);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("제목 수정"),
+        content: TextField(
+          controller: editingTitleController,
+          decoration: const InputDecoration(hintText: "새 제목 입력"),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("취소")),
+          ElevatedButton(
+            onPressed: () {
+              final newTitle = editingTitleController.text;
+              setState(() => title = newTitle);
+              Navigator.pop(context);
+            },
+            child: const Text("확인"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditContentDialog() {
+    TextEditingController editContentController = TextEditingController(text: originalStt);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("내용 수정"),
+        content: TextField(
+          controller: editContentController,
+          decoration: const InputDecoration(hintText: "새 내용 입력"),
+          maxLines: null,
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("취소")),
+          ElevatedButton(
+            onPressed: () {
+              final newContent = editContentController.text;
+              setState(() => originalStt = newContent);
+              Navigator.pop(context);
+            },
+            child: const Text("확인"),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _showEditOptions() {
     showModalBottomSheet(
@@ -99,7 +185,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
             title: const Text("제목 수정"),
             onTap: () {
               Navigator.pop(context);
-              // TODO: 제목 수정 팝업 구현
+              _showEditTitleDialog();
             },
           ),
           ListTile(
@@ -107,13 +193,15 @@ class _FeedbackPageState extends State<FeedbackPage> {
             title: const Text("내용 수정"),
             onTap: () {
               Navigator.pop(context);
-              // TODO: 내용 수정 팝업 구현
+              _showEditContentDialog();
             },
           ),
         ],
       ),
     );
   }
+
+  String formatTime(Duration d) => '${d.inMinutes}:${d.inSeconds.remainder(60).toString().padLeft(2, '0')}';
 
   @override
   Widget build(BuildContext context) {
@@ -130,13 +218,15 @@ class _FeedbackPageState extends State<FeedbackPage> {
           ),
         ],
       ),
-      body: Stack(
+      body: isFullLoading
+          ? const Center(
+        child: CircularProgressIndicator(color: Colors.brown),
+      )
+          : Stack(
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.only(bottom: 80),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -201,11 +291,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                           if (isPlaying) {
                             await audioPlayer.pause();
                           } else {
-                            if (duration == Duration.zero) {
-                              await playAudio(widget.speechBoardId);
-                            } else {
-                              await audioPlayer.resume();
-                            }
+                            await playAudio(widget.speechBoardId);
                           }
                           setState(() => isPlaying = !isPlaying);
                         },

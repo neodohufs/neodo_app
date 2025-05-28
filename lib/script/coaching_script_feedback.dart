@@ -17,6 +17,7 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
   String script = "";
   bool isLoading = true;
   String feedback = "";
+  bool isFeedbackLoading = true;
 
   @override
   void initState() {
@@ -28,7 +29,7 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
     try {
       final token = await getAccessToken();
       final response = await http.get(
-        Uri.parse("https://f8a2-1-230-133-117.ngrok-free.app/api/scripts/$scriptId"),
+        Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/scripts/$scriptId"),
         headers: {
           'Content-type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -36,31 +37,31 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
-        setState(() {
-          title = data['data']['title'] ?? "";
-          if (data['data']['editedScript'] != null) {
-            script = data['data']['editedScript'];
-            fetchScriptFeedback(scriptId, true);
-          } else {
-            script = data['data']['script'];
-            fetchScriptFeedback(scriptId, false);
-          }
-          isLoading = false;
-        });
-      } else {
-        setState(() => isLoading = false);
+        title = data['data']['title'] ?? "";
+        if (data['data']['editedScript'] != null) {
+          script = data['data']['editedScript'];
+          fetchScriptFeedback(scriptId, true);
+        } else {
+          script = data['data']['script'];
+          fetchScriptFeedback(scriptId, false);
+        }
       }
     } catch (e) {
-      setState(() => isLoading = false);
+      print("스크립트 로딩 실패: $e");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
+
 
   Future<void> fetchScriptFeedback(int scriptId, bool edited) async {
     try {
       final token = await getAccessToken();
       final endpoint = edited ? 'edit-feedback' : 'feedback';
       final response = await http.get(
-        Uri.parse("https://f8a2-1-230-133-117.ngrok-free.app/api/scripts/$scriptId/$endpoint"),
+        Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/scripts/$scriptId/$endpoint"),
         headers: {
           'Content-type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -68,20 +69,22 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
-        setState(() {
-          feedback = data['data']['feedback'] ?? "";
-        });
+        feedback = data['data']['feedback'] ?? "";
       }
     } catch (e) {
-      print("에러 : $e");
+      print("피드백 로딩 실패: $e");
+    } finally {
+      setState(() {
+        isFeedbackLoading = false;
+      });
     }
   }
 
-  Future<void> updateScriptField(String field, String value) async {
+  Future<void> updateScriptField(String field, String value, String api) async {
     try {
       final token = await getAccessToken();
       final response = await http.patch(
-        Uri.parse("https://f8a2-1-230-133-117.ngrok-free.app/api/scripts/${widget.scriptId}/edit-feedback"),
+        Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/scripts/${widget.scriptId}/$api"),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token'
@@ -90,9 +93,7 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
       );
 
       if (response.statusCode != 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("수정 실패")),
-        );
+        print("수정 실패 ${response.statusCode}");
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -122,7 +123,7 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
               setState(() {
                 title = newTitle;
               });
-              updateScriptField("title", newTitle);
+              updateScriptField("title", newTitle, "title");
               Navigator.pop(context);
             },
             child: const Text("확인"),
@@ -154,7 +155,7 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
               setState(() {
                 script = newScript;
               });
-              updateScriptField("script", newScript);
+              updateScriptField("script", newScript, "text");
               Navigator.pop(context);
             },
             child: const Text("확인"),
@@ -208,45 +209,47 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("제목: $title", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.brown)),
-              const SizedBox(height: 16),
-              const Text("작성한 대본", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
-              const SizedBox(height: 8),
-              Container(
-                constraints: const BoxConstraints(minHeight: 120),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.brown.shade200),
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.white,
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: isLoading || isFeedbackLoading
+              ? const Center(child: CircularProgressIndicator(
+            color: Colors.brown,
+          ))
+              : SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("제목: $title", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.brown)),
+                const SizedBox(height: 16),
+                const Text("작성한 대본", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
+                const SizedBox(height: 8),
+                Container(
+                  constraints: const BoxConstraints(minHeight: 120),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.brown.shade200),
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.white,
+                  ),
+                  child: Text(script, style: const TextStyle(fontSize: 16)),
                 ),
-                child: Text(script, style: const TextStyle(fontSize: 16)),
-              ),
-              const SizedBox(height: 16),
-              const Text("피드백", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
-              const SizedBox(height: 8),
-              Container(
-                constraints: const BoxConstraints(minHeight: 120),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.brown.shade300),
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.white,
+                const SizedBox(height: 16),
+                const Text("피드백", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
+                const SizedBox(height: 8),
+                Container(
+                  constraints: const BoxConstraints(minHeight: 120),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.brown.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.white,
+                  ),
+                  child: Text(feedback, style: const TextStyle(fontSize: 16)),
                 ),
-                child: Text(feedback, style: const TextStyle(fontSize: 16)),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        )
     );
   }
 }
