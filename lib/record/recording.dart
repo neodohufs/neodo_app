@@ -22,6 +22,7 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
   double _smoothedLevel = 0.0;
   StreamSubscription? _dbSubscription;
   String? _filePath;
+  List<double> _waveHistory = List.filled(50, 0.0);
 
   Duration _recordingDuration = Duration.zero;
   Timer? _timer;
@@ -30,13 +31,17 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-
+    
     _ticker = createTicker((_) {
       setState(() {
-        // smoothing for better wave animation
+        // smooth animation
         _smoothedLevel = _smoothedLevel * 0.3 + _soundLevel * 0.7;
+        //오른쪽 끝에 추가하고 왼쪽으로 밀기
+        _waveHistory.removeAt(0);
+        _waveHistory.add(_smoothedLevel);
       });
     })..start();
+
   }
 
   @override
@@ -163,9 +168,11 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
           const SizedBox(height: 40),
           Expanded(
             child: Center(
-              child: CustomPaint(
-                painter: OptimizedWavePainter(_smoothedLevel),  // ✅ CustomPainter 객체 전달
-                size: Size(MediaQuery.of(context).size.width, 140),
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  painter: OptimizedWavePainter(_waveHistory),
+                  size: Size(MediaQuery.of(context).size.width, 140),
+                ),
               ),
             ),
           ),
