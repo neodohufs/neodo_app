@@ -1,59 +1,32 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_sound/flutter_sound.dart';
-import 'package:neodo/record/sound_wave_painter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import '../meta_data/recording_meta_data.dart';
 
-// 🟫 녹음 페이지
 class RecordingPage extends StatefulWidget {
   @override
   _RecordingPageState createState() => _RecordingPageState();
 }
 
-class _RecordingPageState extends State<RecordingPage> with SingleTickerProviderStateMixin {
+class _RecordingPageState extends State<RecordingPage> {
   final FlutterSoundRecorder _recorder = FlutterSoundRecorder();
   bool _isRecording = false;
   bool _isPaused = false;
-  double _soundLevel = 0.0;
-  double _smoothedLevel = 0.0;
-  StreamSubscription? _dbSubscription;
   String? _filePath;
-  List<double> _waveHistory = List.filled(50, 0.0);
 
   Duration _recordingDuration = Duration.zero;
   Timer? _timer;
-  late Ticker _ticker;
+
 
   @override
   void initState() {
     super.initState();
-
-    _ticker = createTicker((_) {
-      setState(() {
-        _smoothedLevel = _smoothedLevel * 0.3 + _soundLevel * 0.7;
-        _waveHistory.removeAt(0);
-        _waveHistory.add(_smoothedLevel);
-      });
-    })..start();
-
+    _initRecorder();
   }
 
-  @override
-  void dispose() {
-    _ticker.dispose();
-    _timer?.cancel();
-    _dbSubscription?.cancel();
-    _recorder.closeRecorder();
-    super.dispose();
-  }
-
-  Future<void> _startRecording() async {
-    if (_isRecording) return;
-
+  Future<void> _initRecorder() async {
     final status = await Permission.microphone.request();
     if (!status.isGranted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -64,34 +37,27 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
     }
 
     await _recorder.openRecorder();
-    await _recorder.setSubscriptionDuration(const Duration(milliseconds: 100));
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _recorder.closeRecorder();
+    super.dispose();
+  }
+
+  Future<void> _startRecording() async {
+    if (_isRecording) return;
 
     final dir = await getApplicationDocumentsDirectory();
-    _filePath = '${dir.path}/record_${DateTime.now().millisecondsSinceEpoch}.aac';
-
-    print("🎙️ 녹음 시작: $_filePath");
+    _filePath = '${dir.path}/record_${DateTime.now().millisecondsSinceEpoch}.m4a';
 
     await _recorder.startRecorder(
       toFile: _filePath,
-      codec: Codec.aacADTS,
-      bitRate: 128000,
-      sampleRate: 44100,
+      codec: Codec.aacMP4,
     );
 
-    _dbSubscription?.cancel();
-    _dbSubscription = _recorder.onProgress!.listen((event) {
-      final db = event.decibels;
-      if (db == null) {
-        print("⚠️ decibels is null");
-        return;
-      }
-
-      print("🔊 dB: $db");
-      _soundLevel = ((db + 60) / 60).clamp(0.0, 1.0);
-    });
-
     _recordingDuration = Duration.zero;
-    _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       setState(() {
         _recordingDuration += const Duration(seconds: 1);
@@ -128,8 +94,6 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
     if (!_isRecording) return;
 
     await _recorder.stopRecorder();
-    await _recorder.closeRecorder();
-    _dbSubscription?.cancel();
     _timer?.cancel();
 
     setState(() {
@@ -138,6 +102,7 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
     });
 
     if (_filePath != null) {
+      print("파일 저장 경로 : $_filePath");
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -174,16 +139,8 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
             ),
           ),
           const SizedBox(height: 40),
-          Expanded(
-            child: Center(
-              child: RepaintBoundary(
-                child: CustomPaint(
-                  painter: FlowingWavePainter(_waveHistory),
-                  size: Size(MediaQuery.of(context).size.width, 140),
-                ),
-              ),
-            ),
-          ),
+          const Icon(Icons.mic, size: 100, color: Colors.brown),
+          const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 48.0),
             child: Row(

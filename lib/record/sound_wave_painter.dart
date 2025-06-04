@@ -18,7 +18,6 @@ class FlowingWavePainter extends CustomPainter {
     final minHeight = 6.0;
     final cornerRadius = Radius.circular(3.0);
 
-    // 우측 끝 기준으로 좌우 흐름 효과
     double x = size.width - totalWidth;
 
     for (int i = 0; i < waveHistory.length; i++) {
@@ -36,7 +35,5 @@ class FlowingWavePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant FlowingWavePainter oldDelegate) {
-    return true; // 매 프레임마다 다시 그려야 흐름이 자연스러움
-  }
+  bool shouldRepaint(covariant FlowingWavePainter oldDelegate) => true;
 }
