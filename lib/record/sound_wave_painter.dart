@@ -1,11 +1,9 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
-class OptimizedWavePainter extends CustomPainter {
+class FlowingWavePainter extends CustomPainter {
   final List<double> waveHistory;
 
-  OptimizedWavePainter(this.waveHistory);
+  FlowingWavePainter(this.waveHistory);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -13,17 +11,19 @@ class OptimizedWavePainter extends CustomPainter {
       ..color = Colors.brown
       ..style = PaintingStyle.fill;
 
-    final barWidth = 5.0;
-    final spacing = 2.0;
-    final barCount = waveHistory.length;
+    final barWidth = 4.0;
+    final spacing = 1.5;
+    final totalWidth = waveHistory.length * (barWidth + spacing);
     final maxHeight = size.height;
-    final minHeight = 8.0;
+    final minHeight = 6.0;
     final cornerRadius = Radius.circular(3.0);
 
-    for (int i = 0; i < barCount; i++) {
+    // 우측 끝 기준으로 좌우 흐름 효과
+    double x = size.width - totalWidth;
+
+    for (int i = 0; i < waveHistory.length; i++) {
       final level = waveHistory[i];
       final barHeight = (minHeight + level * (maxHeight - minHeight)).clamp(minHeight, maxHeight);
-      final x = i * (barWidth + spacing);
       final y = (size.height - barHeight) / 2;
 
       final rRect = RRect.fromRectAndRadius(
@@ -31,11 +31,12 @@ class OptimizedWavePainter extends CustomPainter {
         cornerRadius,
       );
       canvas.drawRRect(rRect, paint);
+      x += barWidth + spacing;
     }
   }
 
   @override
-  bool shouldRepaint(covariant OptimizedWavePainter oldDelegate) {
-    return oldDelegate.waveHistory != waveHistory;
+  bool shouldRepaint(covariant FlowingWavePainter oldDelegate) {
+    return true; // 매 프레임마다 다시 그려야 흐름이 자연스러움
   }
 }

@@ -31,12 +31,10 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    
+
     _ticker = createTicker((_) {
       setState(() {
-        // smooth animation
         _smoothedLevel = _smoothedLevel * 0.3 + _soundLevel * 0.7;
-        //오른쪽 끝에 추가하고 왼쪽으로 밀기
         _waveHistory.removeAt(0);
         _waveHistory.add(_smoothedLevel);
       });
@@ -66,8 +64,12 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
     }
 
     await _recorder.openRecorder();
+    await _recorder.setSubscriptionDuration(const Duration(milliseconds: 100));
+
     final dir = await getApplicationDocumentsDirectory();
     _filePath = '${dir.path}/record_${DateTime.now().millisecondsSinceEpoch}.aac';
+
+    print("🎙️ 녹음 시작: $_filePath");
 
     await _recorder.startRecorder(
       toFile: _filePath,
@@ -78,8 +80,14 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
 
     _dbSubscription?.cancel();
     _dbSubscription = _recorder.onProgress!.listen((event) {
-      final db = event.decibels ?? -60;
-      _soundLevel = ((db + 60) / 60).clamp(0.0, 1.0); // smoothing은 Ticker에서 처리
+      final db = event.decibels;
+      if (db == null) {
+        print("⚠️ decibels is null");
+        return;
+      }
+
+      print("🔊 dB: $db");
+      _soundLevel = ((db + 60) / 60).clamp(0.0, 1.0);
     });
 
     _recordingDuration = Duration.zero;
@@ -170,7 +178,7 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
             child: Center(
               child: RepaintBoundary(
                 child: CustomPaint(
-                  painter: OptimizedWavePainter(_waveHistory),
+                  painter: FlowingWavePainter(_waveHistory),
                   size: Size(MediaQuery.of(context).size.width, 140),
                 ),
               ),

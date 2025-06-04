@@ -16,7 +16,7 @@ Future<bool> refreshToken() async {
     return false;
   }
 
-  final url = Uri.parse('https://dfd7-119-197-110-182.ngrok-free.app/api/auth/refresh'); // ← API 주소 너가 쓰는 걸로 바꿔
+  final url = Uri.parse('https://3c45-1-230-133-117.ngrok-free.app/api/auth/refresh'); // ← API 주소 너가 쓰는 걸로 바꿔
   final response = await http.post(
     url,
     headers: {
@@ -46,7 +46,7 @@ Future<String?> getValidAccessToken() async {
   String? accessToken = prefs.getString('accessToken');
 
   // 테스트 요청을 통해 토큰이 유효한지 확인 (옵션)
-  final testUrl = Uri.parse('https://dfd7-119-197-110-182.ngrok-free.app/api/users/my-page');
+  final testUrl = Uri.parse('https://3c45-1-230-133-117.ngrok-free.app/api/users/my-page');
   final testResponse = await http.get(
     testUrl,
     headers: {

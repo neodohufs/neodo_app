@@ -59,7 +59,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
   Future<void> fetchTopics() async {
     final accessToken = await getAccessToken();
     final response = await http.get(
-      Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/speech-coachings"),
+      Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/speech-coachings"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
@@ -79,7 +79,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
   Future<void> fetchScripts() async {
     final accessToken = await getAccessToken();
     final response = await http.get(
-      Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/scripts"),
+      Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/scripts"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
@@ -133,7 +133,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
     if (confirm == true) {
       final token = await getAccessToken();
       final response = await http.delete(
-        Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/scripts/$scriptId"),
+        Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/scripts/$scriptId"),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token'

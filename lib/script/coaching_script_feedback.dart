@@ -29,7 +29,7 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
     try {
       final token = await getAccessToken();
       final response = await http.get(
-        Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/scripts/$scriptId"),
+        Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/scripts/$scriptId"),
         headers: {
           'Content-type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -61,7 +61,7 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
       final token = await getAccessToken();
       final endpoint = edited ? 'edit-feedback' : 'feedback';
       final response = await http.get(
-        Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/scripts/$scriptId/$endpoint"),
+        Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/scripts/$scriptId/$endpoint"),
         headers: {
           'Content-type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -84,7 +84,7 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
     try {
       final token = await getAccessToken();
       final response = await http.patch(
-        Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/scripts/${widget.scriptId}/$api"),
+        Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/scripts/${widget.scriptId}/$api"),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token'

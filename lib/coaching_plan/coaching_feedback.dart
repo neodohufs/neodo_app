@@ -47,7 +47,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
     try {
       final token = await getAccessToken();
       final response = await http.get(
-        Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/speech-coachings/$id/record"),
+        Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/speech-coachings/$id/record"),
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
@@ -66,7 +66,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
     try {
       final token = await getAccessToken();
       final response = await http.get(
-        Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/speech-coachings/$id/feedback"),
+        Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/speech-coachings/$id/feedback"),
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
@@ -90,7 +90,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
     try {
       final token = await getAccessToken();
       final response = await http.patch(
-        Uri.parse("https://dfd7-119-197-110-182.ngrok-free.app/api/speech-coachings/${widget.speechCoachingId}/$api"),
+        Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/speech-coachings/${widget.speechCoachingId}/$api"),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token'
