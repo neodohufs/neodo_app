@@ -52,13 +52,15 @@ class _RecordingMetaDataPageState extends State<RecordingMetaDataPage> {
       return;
     }
 
-    final token = await getValidAccessToken();
-    final uri = 'https://3c45-1-230-133-117.ngrok-free.app/api/speech-boards/record';
+    final accessToken = await getAccessToken();
+    final refreshToken = await getRefreshToken();
+    final uri = 'https://bb69-1-230-133-117.ngrok-free.app/api/speech-boards/record';
 
     final file = File(widget.filePath);
     final dio = Dio();
     String title = _titleController.text;
-    dio.options.headers['Authorization'] = 'Bearer $token';
+    dio.options.headers['Authorization'] = 'Bearer $accessToken';
+    dio.options.headers['Set-Cookie'] = 'Bearer $refreshToken';
 
     final metadata = {
       "atmosphere": koreanToEnglish[_selectedAtmosphere],

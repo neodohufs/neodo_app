@@ -7,6 +7,14 @@ Future<String?> getAccessToken() async {
   return prefs.getString('accessToken');
 }
 
+
+Future<String?> getRefreshToken() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getString('refreshToken');
+}
+
+
+/*
 Future<bool> refreshToken() async {
   final prefs = await SharedPreferences.getInstance();
   final refreshToken = prefs.getString('refreshToken');
@@ -16,7 +24,7 @@ Future<bool> refreshToken() async {
     return false;
   }
 
-  final url = Uri.parse('https://3c45-1-230-133-117.ngrok-free.app/api/auth/refresh');
+  final url = Uri.parse('https://bb69-1-230-133-117.ngrok-free.app/api/auth/refresh');
   final response = await http.post(
     url,
     headers: {
@@ -57,7 +65,7 @@ Future<String?> getValidAccessToken() async {
   String? accessToken = prefs.getString('accessToken');
 
   // 테스트 요청을 통해 토큰이 유효한지 확인 (옵션)
-  final testUrl = Uri.parse('https://3c45-1-230-133-117.ngrok-free.app/api/users/my-page');
+  final testUrl = Uri.parse('https://bb69-1-230-133-117.ngrok-free.app/api/users/my-page');
   final testResponse = await http.get(
     testUrl,
     headers: {
@@ -82,3 +90,4 @@ Future<String?> getValidAccessToken() async {
     return null;
   }
 }
+*/

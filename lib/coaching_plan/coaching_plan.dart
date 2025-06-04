@@ -57,12 +57,14 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
   }
 
   Future<void> fetchTopics() async {
-    final accessToken = await getValidAccessToken();
+    final accessToken = await getAccessToken();
+    final refreshToken = await getRefreshToken();
     final response = await http.get(
-      Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/speech-coachings"),
+      Uri.parse("https://bb69-1-230-133-117.ngrok-free.app/api/speech-coachings"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
+        'Set-Cookie': 'RefreshToken=$refreshToken',
       },
     );
 
@@ -77,12 +79,14 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
   }
 
   Future<void> fetchScripts() async {
-    final accessToken = await getValidAccessToken();
+    final accessToken = await getAccessToken();
+    final refreshToken = await getRefreshToken();
     final response = await http.get(
-      Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/scripts"),
+      Uri.parse("https://bb69-1-230-133-117.ngrok-free.app/api/scripts"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
+        'Set-Cookie': 'RefreshToken=$refreshToken',
       },
     );
 
@@ -100,7 +104,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
     if (speechCoachingId == null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => minRecordingPage(topicId: selectedTopicId)),
+        MaterialPageRoute(builder: (context) => MinRecordingPage(topicId: selectedTopicId)),
       );
     } else {
       Navigator.pushReplacement(
@@ -131,12 +135,14 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
     );
 
     if (confirm == true) {
-      final token = await getValidAccessToken();
+      final accessToken = await getAccessToken();
+      final refreshToken = await getRefreshToken();
       final response = await http.delete(
-        Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/scripts/$scriptId"),
+        Uri.parse("https://bb69-1-230-133-117.ngrok-free.app/api/scripts/$scriptId"),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token'
+          'Authorization': 'Bearer $accessToken',
+          'Set-Cookie': 'RefreshToken=$refreshToken',
         },
       );
 
@@ -161,7 +167,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
       backgroundColor: const Color(0xFFFFF8E8),
       appBar: AppBar(
         backgroundColor: Colors.brown,
-        title: const Text('\uc2a4\ud53c\uce58 \ucf54\uce58\u5f0f', style: TextStyle(color: Colors.white)),
+        title: const Text('스피치 코칭', style: TextStyle(color: Colors.white)),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       floatingActionButton: FloatingActionButton(
@@ -183,7 +189,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
               Row(
                 children: [
                   ChoiceChip(
-                    label: Text('3\ubd84 \uc2a4\ud53c\uce58'),
+                    label: Text('3분 스피치'),
                     selected: showTopics,
                     showCheckmark: false,
                     onSelected: (_) => setState(() => showTopics = true),
@@ -235,7 +241,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
       return const Center(
         child: Padding(
           padding: EdgeInsets.only(top: 40),
-          child: Text('\uc2a4\ud53c\uce58 \ubcf4\ub4dc\uc5d0 \ub178\uadf8\uc74c\uc744 \ucd94\uac00\ud558\uc138\uc694', style: TextStyle(color: Colors.brown, fontSize: 16)),
+          child: Text('스피치 보드에 녹음을 추가하세요', style: TextStyle(color: Colors.brown, fontSize: 16)),
         ),
       );
     }
@@ -259,7 +265,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('\uc2e0\uaddc \uc2a4\ud53c\uce58 ${index + 1}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
+                  Text('신규 스피치 ${index + 1}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
                   const SizedBox(height: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,7 +295,12 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
 
   Widget buildScriptList() {
     if (fetchScriptsData.isEmpty) {
-      return const Center(child: Text('\ub4f1\ub85d\ub41c \uc2a4\ud53c\uce58 \ub300\ubcf8\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.', style: TextStyle(color: Colors.brown)));
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.only(top: 40),
+          child: Text('등록된 스피치 대본이 없습니다.', style: TextStyle(color: Colors.brown, fontSize: 16)),
+        ),
+      );
     }
 
     return ListView.builder(
@@ -298,8 +309,8 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
       itemCount: fetchScriptsData.length,
       itemBuilder: (context, index) {
         final script = fetchScriptsData[index];
-        final title = script['title'] ?? '(\uc81c\ubaa9 \uc5c6\uc74c)';
-        final createdAt = script['createdAt'] != null ? script['createdAt'].substring(0, 10) : '\ub0a0\uc9dc \uc5c6\uc74c';
+        final title = script['title'] ?? '(제목 없음)';
+        final createdAt = script['createdAt'] != null ? script['createdAt'].substring(0, 10) : '날짜 없음';
         final scriptId = script['id'];
 
         return Card(
@@ -308,7 +319,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
           elevation: 3,
           child: ListTile(
             title: Text(title, style: TextStyle(color: Colors.brown)),
-            subtitle: Text('\uc791\uc131\uc77c: $createdAt', style: TextStyle(color: Colors.brown.shade300)),
+            subtitle: Text('작성일: $createdAt', style: TextStyle(color: Colors.brown.shade300)),
             onTap: () => _navigateToScriptDetail(scriptId),
             trailing: IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),

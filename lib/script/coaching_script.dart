@@ -55,7 +55,7 @@ class _CoachingScriptWritePageState extends State<CoachingScriptWritePage> {
             const SizedBox(height: 12),
             TextField(
               controller: _controller,
-              maxLines: 20,
+              maxLines: 40,
               decoration: InputDecoration(
                 hintText: "스피치 대본을 입력하세요",
                 filled: true,

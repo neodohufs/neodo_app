@@ -45,10 +45,11 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
 
   Future<void> fetchAndPrepareAudio(int id) async {
     try {
-      final token = await getValidAccessToken();
+      final accessToken = await getAccessToken();
+      final refreshToken = await getRefreshToken();
       final response = await http.get(
-        Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/speech-coachings/$id/record"),
-        headers: {'Authorization': 'Bearer $token'},
+        Uri.parse("https://bb69-1-230-133-117.ngrok-free.app/api/speech-coachings/$id/record"),
+        headers: {'Authorization': 'Bearer $accessToken', 'Set-Cookie': 'RefreshToken=$refreshToken'},
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -64,10 +65,11 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
 
   Future<void> fetchTextAndFeedback(int id) async {
     try {
-      final token = await getValidAccessToken();
+      final accessToken = await getAccessToken();
+      final refreshToken = await getRefreshToken();
       final response = await http.get(
-        Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/speech-coachings/$id/feedback"),
-        headers: {'Authorization': 'Bearer $token'},
+        Uri.parse("https://bb69-1-230-133-117.ngrok-free.app/api/speech-coachings/$id/record"),
+        headers: {'Authorization': 'Bearer $accessToken', 'Set-Cookie': 'RefreshToken=$refreshToken'},
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -88,12 +90,14 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
 
   Future<void> updateFeedbackField(String field, String value, String api) async {
     try {
-      final token = await getValidAccessToken();
+      final accessToken = await getAccessToken();
+      final refreshToken = await getRefreshToken();
       final response = await http.patch(
-        Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/speech-coachings/${widget.speechCoachingId}/$api"),
+        Uri.parse("https://bb69-1-230-133-117.ngrok-free.app/api/speech-coachings/${widget.speechCoachingId}/$api"),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token'
+          'Authorization': 'Bearer $accessToken',
+          'Set-Cookie': 'RefreshToken=$refreshToken',
         },
         body: jsonEncode({field: value}),
       );

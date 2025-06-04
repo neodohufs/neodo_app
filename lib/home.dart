@@ -27,17 +27,19 @@ class _HomePageState extends State<HomePage> {
   GlobalKey<ScaffoldState>(); // GlobalKey 추가
   User? user;
   postFile(File file, String atmosphere, String purpose, String scale, String audience, int deadline, String title) async {
-    final uri = 'https://3c45-1-230-133-117.ngrok-free.app/api/speech-boards/record';
+    final uri = 'https://bb69-1-230-133-117.ngrok-free.app/api/speech-boards/record';
 
     // SharedPreferences에서 accessToken 가져오기
-    final token = await getValidAccessToken();
+    final accessToken = await getAccessToken();
+    final refreshToken = await getRefreshToken();
 
     var dio = Dio();
 
     // Authorization 헤더 추가
-    if (token != null) {
-      dio.options.headers['Authorization'] = 'Bearer $token';
-      print("토큰 전송 완료 $token");
+    if (accessToken != null) {
+      dio.options.headers['Authorization'] = 'Bearer $accessToken';
+      dio.options.headers['Set-Cookie'] = 'Bearer $refreshToken';
+      print("토큰 전송 완료 $accessToken");
     } else {
       print("토큰에 아무것도 안 담김");
     }

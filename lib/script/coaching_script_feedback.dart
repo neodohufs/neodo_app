@@ -27,12 +27,14 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
 
   Future<void> fetchScriptDetail(int scriptId) async {
     try {
-      final token = await getValidAccessToken();
+      final accessToken = await getAccessToken();
+      final refreshToken = await getRefreshToken();
       final response = await http.get(
-        Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/scripts/$scriptId"),
+        Uri.parse("https://bb69-1-230-133-117.ngrok-free.app/api/scripts/$scriptId"),
         headers: {
           'Content-type': 'application/json',
-          'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer $accessToken',
+          'Set-Cookie': 'RefreshToken=$refreshToken',
         },
       );
       if (response.statusCode == 200) {
@@ -58,13 +60,15 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
 
   Future<void> fetchScriptFeedback(int scriptId, bool edited) async {
     try {
-      final token = await getValidAccessToken();
+      final accessToken = await getAccessToken();
+      final refreshToken = await getRefreshToken();
       final endpoint = edited ? 'edit-feedback' : 'feedback';
       final response = await http.get(
-        Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/scripts/$scriptId/$endpoint"),
+        Uri.parse("https://bb69-1-230-133-117.ngrok-free.app/api/scripts/$scriptId/$endpoint"),
         headers: {
           'Content-type': 'application/json',
-          'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer $accessToken',
+          'Set-Cookie': 'RefreshToken=$refreshToken',
         },
       );
       if (response.statusCode == 200) {
@@ -82,12 +86,14 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
 
   Future<void> updateScriptField(String field, String value, String api) async {
     try {
-      final token = await getValidAccessToken();
+      final accessToken = await getAccessToken();
+      final refreshToken = await getRefreshToken();
       final response = await http.patch(
-        Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/scripts/${widget.scriptId}/$api"),
+        Uri.parse("https://bb69-1-230-133-117.ngrok-free.app/api/scripts/${widget.scriptId}/$api"),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token'
+          'Authorization': 'Bearer $accessToken',
+          'Set-Cookie': 'RefreshToken=$refreshToken',
         },
         body: jsonEncode({field: value}),
       );

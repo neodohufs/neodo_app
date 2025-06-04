@@ -59,10 +59,12 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
   Future<void> fetchAndPrepareAudio(int id) async {
     try {
-      final token = await getValidAccessToken();
+      final accessToken = await getAccessToken();
+      final refreshToken = await getRefreshToken();
       final response = await http.get(
-        Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/speech-boards/$id/record"),
-        headers: {'Authorization': 'Bearer $token'},
+        Uri.parse("https://bb69-1-230-133-117.ngrok-free.app/api/speech-boards/$id/record"),
+        headers: {'Authorization': 'Bearer $accessToken',
+          'Set-Cookie': 'RefreshToken=$refreshToken',},
       );
       if (response.statusCode == 200) {
         final audioRecord = json.decode(response.body)['data']['record'];
@@ -77,10 +79,12 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
   Future<void> fetchTextAndFeedback(int id) async {
     try {
-      final token = await getValidAccessToken();
+      final accessToken = await getAccessToken();
+      final refreshToken = await getRefreshToken();
       final response = await http.get(
-        Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/speech-boards/$id/feedback"),
-        headers: {'Authorization': 'Bearer $token'},
+        Uri.parse("https://bb69-1-230-133-117.ngrok-free.app/api/speech-boards/$id/feedback"),
+        headers: {'Authorization': 'Bearer $accessToken',
+          'Set-Cookie': 'RefreshToken=$refreshToken',},
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
@@ -101,10 +105,12 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
   Future<void> fetchTitle(int id) async {
     try {
-      final token = await getValidAccessToken();
+      final accessToken = await getAccessToken();
+      final refreshToken = await getRefreshToken();
       final response = await http.get(
-        Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/speech-boards/$id/record"),
-        headers: {'Authorization': 'Bearer $token'},
+        Uri.parse("https://bb69-1-230-133-117.ngrok-free.app/api/speech-boards/$id/record"),
+        headers: {'Authorization': 'Bearer $accessToken',
+          'Set-Cookie': 'RefreshToken=$refreshToken',},
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(utf8.decode(response.bodyBytes));

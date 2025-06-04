@@ -11,11 +11,12 @@ class AudioProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> fetchAudioFiles() async {
-    final url = 'https://3c45-1-230-133-117.ngrok-free.app/api/speech-boards';
+    final url = 'https://bb69-1-230-133-117.ngrok-free.app/api/speech-boards';
 
-    final token = await getValidAccessToken();
+    final accessToken = await getAccessToken();
+    final refreshToken = await getRefreshToken();
 
-    if (token == null) {
+    if (accessToken == null) {
       print('Access Token이 없습니다.');
       return;
     }
@@ -27,7 +28,8 @@ class AudioProvider with ChangeNotifier {
       final response = await http.get(
         Uri.parse(url),
         headers: {
-          'Authorization': 'Bearer $token', // Access Token 추가
+          'Authorization': 'Bearer $accessToken',
+          'Set-Cookie': 'RefreshToken=$refreshToken', // Access Token 추가
           'Content-Type': 'application/json',
         },
       );
