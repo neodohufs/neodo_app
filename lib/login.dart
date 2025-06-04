@@ -140,21 +140,40 @@ class _LoginPageState extends State<LoginPage> {
 
       if (response.statusCode == 200) {
         print("로그인 성공: ${emailController.text}, ${passwordController.text}");
+
+        // Access Token 파싱
         String? accessToken = response.headers['authorization'] ?? response.headers['Authorization'];
         if (accessToken != null && accessToken.startsWith('Bearer ')) {
           accessToken = accessToken.substring(7);
         }
 
+        // SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+
+        // Access Token 저장
         if (accessToken != null) {
-          final prefs = await SharedPreferences.getInstance();
           await prefs.setString('accessToken', accessToken);
-          print("토큰 저장 완료: $accessToken");
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => HomePage()),
-          );
+          print("✅ AccessToken 저장 완료: $accessToken");
         }
-      } else {
+
+        // Refresh Token 저장 (Set-Cookie 방식)
+        final setCookie = response.headers['set-cookie'];
+        if (setCookie != null) {
+          final match = RegExp(r'RefreshToken=([^;]+)').firstMatch(setCookie);
+          if (match != null) {
+            final refreshToken = match.group(1);
+            await prefs.setString('refreshToken', refreshToken!);
+            print("✅ RefreshToken 저장 완료: $refreshToken");
+          }
+        }
+
+        // 페이지 이동
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => HomePage()),
+        );
+      }
+      else {
         _showErrorDialog(context, '로그인 실패: ${response.body}');
       }
     } catch (e) {

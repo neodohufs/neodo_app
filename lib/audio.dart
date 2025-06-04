@@ -13,7 +13,7 @@ class AudioProvider with ChangeNotifier {
   Future<void> fetchAudioFiles() async {
     final url = 'https://3c45-1-230-133-117.ngrok-free.app/api/speech-boards';
 
-    final token = await getAccessToken();
+    final token = await getValidAccessToken();
 
     if (token == null) {
       print('Access Token이 없습니다.');

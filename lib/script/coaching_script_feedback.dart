@@ -27,7 +27,7 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
 
   Future<void> fetchScriptDetail(int scriptId) async {
     try {
-      final token = await getAccessToken();
+      final token = await getValidAccessToken();
       final response = await http.get(
         Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/scripts/$scriptId"),
         headers: {
@@ -58,7 +58,7 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
 
   Future<void> fetchScriptFeedback(int scriptId, bool edited) async {
     try {
-      final token = await getAccessToken();
+      final token = await getValidAccessToken();
       final endpoint = edited ? 'edit-feedback' : 'feedback';
       final response = await http.get(
         Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/scripts/$scriptId/$endpoint"),
@@ -82,7 +82,7 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
 
   Future<void> updateScriptField(String field, String value, String api) async {
     try {
-      final token = await getAccessToken();
+      final token = await getValidAccessToken();
       final response = await http.patch(
         Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/scripts/${widget.scriptId}/$api"),
         headers: {

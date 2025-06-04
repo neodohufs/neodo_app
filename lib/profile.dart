@@ -27,7 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> fetchUserProfile() async {
-    final token = await getAccessToken();
+    final token = await getValidAccessToken();
     final url = Uri.parse('https://3c45-1-230-133-117.ngrok-free.app/api/users/my-page');
 
     try {

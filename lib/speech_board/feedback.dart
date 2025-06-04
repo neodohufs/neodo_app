@@ -59,7 +59,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
   Future<void> fetchAndPrepareAudio(int id) async {
     try {
-      final token = await getAccessToken();
+      final token = await getValidAccessToken();
       final response = await http.get(
         Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/speech-boards/$id/record"),
         headers: {'Authorization': 'Bearer $token'},
@@ -77,7 +77,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
   Future<void> fetchTextAndFeedback(int id) async {
     try {
-      final token = await getAccessToken();
+      final token = await getValidAccessToken();
       final response = await http.get(
         Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/speech-boards/$id/feedback"),
         headers: {'Authorization': 'Bearer $token'},
@@ -101,7 +101,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
   Future<void> fetchTitle(int id) async {
     try {
-      final token = await getAccessToken();
+      final token = await getValidAccessToken();
       final response = await http.get(
         Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/speech-boards/$id/record"),
         headers: {'Authorization': 'Bearer $token'},

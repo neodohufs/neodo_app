@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
+import 'package:neodo/record/sound_wave_painter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import '../meta_data/recording_meta_data.dart';
@@ -19,6 +20,10 @@ class _RecordingPageState extends State<RecordingPage> {
   Duration _recordingDuration = Duration.zero;
   Timer? _timer;
 
+  double _soundLevel = 0.0;
+  double _smoothedLevel = 0.0;
+  List<double> _waveHistory = List.filled(50, 0.0);
+  StreamSubscription? _dbSubscription;
 
   @override
   void initState() {
@@ -37,11 +42,13 @@ class _RecordingPageState extends State<RecordingPage> {
     }
 
     await _recorder.openRecorder();
+    await _recorder.setSubscriptionDuration(const Duration(milliseconds: 100));
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _dbSubscription?.cancel();
     _recorder.closeRecorder();
     super.dispose();
   }
@@ -56,6 +63,19 @@ class _RecordingPageState extends State<RecordingPage> {
       toFile: _filePath,
       codec: Codec.aacMP4,
     );
+
+    _dbSubscription = _recorder.onProgress!.listen((event) {
+      final db = event.decibels;
+      if (db == null) return;
+
+      setState(() {
+        _soundLevel = ((db + 60) / 60).clamp(0.0, 1.0);
+        _smoothedLevel = _smoothedLevel * 0.3 + _soundLevel * 0.7;
+
+        _waveHistory.removeAt(0);
+        _waveHistory.add(_smoothedLevel);
+      });
+    });
 
     _recordingDuration = Duration.zero;
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -94,6 +114,7 @@ class _RecordingPageState extends State<RecordingPage> {
     if (!_isRecording) return;
 
     await _recorder.stopRecorder();
+    _dbSubscription?.cancel();
     _timer?.cancel();
 
     setState(() {
@@ -139,7 +160,16 @@ class _RecordingPageState extends State<RecordingPage> {
             ),
           ),
           const SizedBox(height: 40),
-          const Icon(Icons.mic, size: 100, color: Colors.brown),
+
+          // 🔊 Wave 시각화
+          SizedBox(
+            height: 140,
+            child: CustomPaint(
+              painter: FlowingWavePainter(_waveHistory),
+              size: Size(MediaQuery.of(context).size.width, 140),
+            ),
+          ),
+
           const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 48.0),

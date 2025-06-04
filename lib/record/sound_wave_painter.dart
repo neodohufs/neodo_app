@@ -13,14 +13,14 @@ class FlowingWavePainter extends CustomPainter {
 
     final barWidth = 4.0;
     final spacing = 1.5;
-    final totalWidth = waveHistory.length * (barWidth + spacing);
     final maxHeight = size.height;
     final minHeight = 6.0;
     final cornerRadius = Radius.circular(3.0);
 
-    double x = size.width - totalWidth;
+    // 오른쪽부터 왼쪽으로 그리기
+    double x = size.width - barWidth;
 
-    for (int i = 0; i < waveHistory.length; i++) {
+    for (int i = waveHistory.length - 1; i >= 0; i--) {
       final level = waveHistory[i];
       final barHeight = (minHeight + level * (maxHeight - minHeight)).clamp(minHeight, maxHeight);
       final y = (size.height - barHeight) / 2;
@@ -30,7 +30,9 @@ class FlowingWavePainter extends CustomPainter {
         cornerRadius,
       );
       canvas.drawRRect(rRect, paint);
-      x += barWidth + spacing;
+      x -= (barWidth + spacing);
+
+      if (x < 0) break; // 화면 벗어나면 중단
     }
   }
 

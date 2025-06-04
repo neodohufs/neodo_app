@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
     final uri = 'https://3c45-1-230-133-117.ngrok-free.app/api/speech-boards/record';
 
     // SharedPreferences에서 accessToken 가져오기
-    final token = await getAccessToken();
+    final token = await getValidAccessToken();
 
     var dio = Dio();
 

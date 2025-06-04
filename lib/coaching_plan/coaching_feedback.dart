@@ -45,7 +45,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
 
   Future<void> fetchAndPrepareAudio(int id) async {
     try {
-      final token = await getAccessToken();
+      final token = await getValidAccessToken();
       final response = await http.get(
         Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/speech-coachings/$id/record"),
         headers: {'Authorization': 'Bearer $token'},
@@ -64,7 +64,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
 
   Future<void> fetchTextAndFeedback(int id) async {
     try {
-      final token = await getAccessToken();
+      final token = await getValidAccessToken();
       final response = await http.get(
         Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/speech-coachings/$id/feedback"),
         headers: {'Authorization': 'Bearer $token'},
@@ -88,7 +88,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
 
   Future<void> updateFeedbackField(String field, String value, String api) async {
     try {
-      final token = await getAccessToken();
+      final token = await getValidAccessToken();
       final response = await http.patch(
         Uri.parse("https://3c45-1-230-133-117.ngrok-free.app/api/speech-coachings/${widget.speechCoachingId}/$api"),
         headers: {

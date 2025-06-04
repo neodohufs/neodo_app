@@ -16,7 +16,7 @@ Future<bool> refreshToken() async {
     return false;
   }
 
-  final url = Uri.parse('https://3c45-1-230-133-117.ngrok-free.app/api/auth/refresh'); // ← API 주소 너가 쓰는 걸로 바꿔
+  final url = Uri.parse('https://3c45-1-230-133-117.ngrok-free.app/api/auth/refresh');
   final response = await http.post(
     url,
     headers: {
@@ -28,10 +28,20 @@ Future<bool> refreshToken() async {
   if (response.statusCode == 200) {
     final data = jsonDecode(response.body);
     final newAccessToken = data['accessToken'];
-    final newRefreshToken = data['refreshToken'];
 
+    // 1. AccessToken 저장
     await prefs.setString('accessToken', newAccessToken);
-    await prefs.setString('refreshToken', newRefreshToken);
+
+    // 2. Set-Cookie에서 RefreshToken 추출
+    final setCookie = response.headers['set-cookie'];
+    if (setCookie != null) {
+      final refreshTokenMatch = RegExp(r'RefreshToken=([^;]+)').firstMatch(setCookie);
+      if (refreshTokenMatch != null) {
+        final newRefreshToken = refreshTokenMatch.group(1);
+        await prefs.setString('refreshToken', newRefreshToken!);
+        print('✅ RefreshToken 재저장 완료');
+      }
+    }
 
     print('✅ 토큰 재발급 완료');
     return true;
@@ -40,6 +50,7 @@ Future<bool> refreshToken() async {
     return false;
   }
 }
+
 
 Future<String?> getValidAccessToken() async {
   final prefs = await SharedPreferences.getInstance();
