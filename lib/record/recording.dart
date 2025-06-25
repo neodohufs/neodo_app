@@ -233,7 +233,6 @@ class _RecordingPageState extends State<RecordingPage> {
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
-import 'package:neodo/record/sound_wave_painter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import '../meta_data/recording_meta_data.dart';
@@ -251,11 +250,10 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
 
   Duration _recordingDuration = Duration.zero;
   Timer? _timer;
+  StreamSubscription? _dbSubscription;
 
   double _soundLevel = 0.0;
   double _smoothedLevel = 0.0;
-  List<double> _waveHistory = List.filled(50, 0.0);
-  StreamSubscription? _dbSubscription;
   late final AnimationController _waveController;
 
   @override
@@ -265,8 +263,8 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
       vsync: this,
       duration: const Duration(milliseconds: 100),
     )..addListener(() {
-      setState(() {}); // 강제로 다시 그리게 하기
-    })..repeat();
+      setState(() {});
+    });
 
     _initRecorder();
   }
@@ -286,6 +284,14 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
   }
 
   @override
+  void deactivate() {
+    if (_isRecording) {
+      _stopRecording();
+    }
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     _waveController.dispose();
     _timer?.cancel();
@@ -295,8 +301,6 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
   }
 
   Future<void> _startRecording() async {
-    if (_isRecording) return;
-
     final dir = await getApplicationDocumentsDirectory();
     _filePath = '${dir.path}/record_${DateTime.now().millisecondsSinceEpoch}.m4a';
 
@@ -312,9 +316,6 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
       setState(() {
         _soundLevel = ((db + 60) / 60).clamp(0.0, 1.0);
         _smoothedLevel = _smoothedLevel * 0.3 + _soundLevel * 0.7;
-
-        _waveHistory.removeAt(0);
-        _waveHistory.add(_smoothedLevel);
       });
     });
 
@@ -324,6 +325,8 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
         _recordingDuration += const Duration(seconds: 1);
       });
     });
+
+    _waveController.repeat();
 
     setState(() {
       _isRecording = true;
@@ -352,17 +355,18 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
   }
 
   Future<void> _stopRecording() async {
-    if (!_isRecording) return;
-
     await _recorder.stopRecorder();
     _dbSubscription?.cancel();
     _timer?.cancel();
+    _waveController.stop();
 
     setState(() {
       _isRecording = false;
       _isPaused = false;
     });
+  }
 
+  void _finishRecording() {
     if (_filePath != null) {
       Navigator.pushReplacement(
         context,
@@ -389,8 +393,8 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 40),
           Text(
             formatDuration(_recordingDuration),
             style: const TextStyle(
@@ -399,17 +403,43 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
               color: Colors.brown,
             ),
           ),
-          const SizedBox(height: 40),
-          AnimatedBuilder(
-            animation: _waveController,
-            builder: (context, child) {
-              return CustomPaint(
-                painter: FlowingWavePainter(_waveHistory),
-                size: Size(MediaQuery.of(context).size.width, 140),
-              );
-            },
+          const SizedBox(height: 60),
+          Center(
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CustomPaint(
+                  painter: CircleVisualizerPainter(
+                    level: (_isRecording && !_isPaused) ? _smoothedLevel : 0.0,
+                  ),
+                  size: const Size(250, 250),
+                ),
+                GestureDetector(
+                  onTap: () async {
+                    if (!_isRecording) {
+                      await _startRecording();
+                    } else {
+                      await _pauseResume();
+                    }
+                  },
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundColor: Colors.brown,
+                    child: Icon(
+                      !_isRecording
+                          ? Icons.mic
+                          : _isPaused
+                          ? Icons.play_arrow
+                          : Icons.pause,
+                      color: Colors.white,
+                      size: 40,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 40),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 48.0),
             child: Row(
@@ -427,30 +457,13 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
                   ),
                   child: const Text('취소'),
                 ),
-                GestureDetector(
-                  onTap: () async {
-                    if (!_isRecording) {
-                      await _startRecording();
-                    } else {
-                      await _pauseResume();
-                    }
-                  },
-                  child: CircleAvatar(
-                    radius: 36,
-                    backgroundColor: Colors.brown,
-                    child: Icon(
-                      !_isRecording
-                          ? Icons.mic
-                          : _isPaused
-                          ? Icons.play_arrow
-                          : Icons.pause,
-                      color: Colors.white,
-                      size: 36,
-                    ),
-                  ),
-                ),
                 ElevatedButton(
-                  onPressed: _isRecording ? _stopRecording : null,
+                  onPressed: _isRecording
+                      ? () async {
+                    await _stopRecording();
+                    _finishRecording();
+                  }
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.brown,
                     foregroundColor: Colors.white,
@@ -466,5 +479,31 @@ class _RecordingPageState extends State<RecordingPage> with SingleTickerProvider
         ],
       ),
     );
+  }
+}
+
+class CircleVisualizerPainter extends CustomPainter {
+  final double level;
+
+  CircleVisualizerPainter({required this.level});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (level < 0.01) return; // level이 너무 낮으면 그리지 않음
+
+    final center = Offset(size.width / 2, size.height / 2);
+    final eased = Curves.easeOut.transform(level);
+    final radius = 60.0 + eased * 40.0;
+
+    final paint = Paint()
+      ..color = Colors.brown.withOpacity(0.3)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(center, radius, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CircleVisualizerPainter oldDelegate) {
+    return oldDelegate.level != level;
   }
 }

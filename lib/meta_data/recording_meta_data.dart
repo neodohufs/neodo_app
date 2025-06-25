@@ -54,7 +54,7 @@ class _RecordingMetaDataPageState extends State<RecordingMetaDataPage> {
 
     final accessToken = await getAccessToken();
     final refreshToken = await getRefreshToken();
-    final uri = 'https://bb69-1-230-133-117.ngrok-free.app/api/speech-boards/record';
+    final uri = 'https://7720-1-230-133-117.ngrok-free.app/api/speech-boards/record';
 
     final file = File(widget.filePath);
     final dio = Dio();

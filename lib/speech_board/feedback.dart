@@ -23,22 +23,37 @@ class _FeedbackPageState extends State<FeedbackPage> {
   int score = 0;
   String title = "";
   List<String> topics = [];
+  String audioUrl = "";
 
   bool isFullLoading = true;
 
   @override
   void initState() {
     super.initState();
-    audioPlayer.onDurationChanged.listen((d) => setState(() => duration = d));
-    audioPlayer.onPositionChanged.listen((p) => setState(() => position = p));
-    audioPlayer.onPlayerComplete.listen((_) {
-      if (mounted) {
+
+    audioPlayer.onDurationChanged.listen((d) {
+      if (mounted && d > Duration.zero) {
         setState(() {
-          isPlaying = false;
-          position = Duration.zero;
+          duration = d;
         });
       }
     });
+
+    audioPlayer.onPositionChanged.listen((p) {
+      if (mounted && p <= duration) {
+        setState(() => position = p);
+      }
+    });
+
+    audioPlayer.onPlayerComplete.listen((event) {
+      if (mounted) {
+        setState(() {
+          isPlaying = false;
+          position = duration;
+        });
+      }
+    });
+
     loadAllData();
   }
 
@@ -62,13 +77,15 @@ class _FeedbackPageState extends State<FeedbackPage> {
       final accessToken = await getAccessToken();
       final refreshToken = await getRefreshToken();
       final response = await http.get(
-        Uri.parse("https://bb69-1-230-133-117.ngrok-free.app/api/speech-boards/$id/record"),
-        headers: {'Authorization': 'Bearer $accessToken',
-          'Set-Cookie': 'RefreshToken=$refreshToken',},
+        Uri.parse("https://7720-1-230-133-117.ngrok-free.app/api/speech-boards/$id/record"),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Set-Cookie': 'RefreshToken=$refreshToken',
+        },
       );
       if (response.statusCode == 200) {
-        final audioRecord = json.decode(response.body)['data']['record'];
-        await audioPlayer.setSourceUrl(audioRecord);
+        audioUrl = json.decode(response.body)['data']['record'];
+        await audioPlayer.setSourceUrl(audioUrl);
       } else {
         print("[fetchAndPrepareAudio] 실패: 상태 코드 ${response.statusCode}");
       }
@@ -82,9 +99,11 @@ class _FeedbackPageState extends State<FeedbackPage> {
       final accessToken = await getAccessToken();
       final refreshToken = await getRefreshToken();
       final response = await http.get(
-        Uri.parse("https://bb69-1-230-133-117.ngrok-free.app/api/speech-boards/$id/feedback"),
-        headers: {'Authorization': 'Bearer $accessToken',
-          'Set-Cookie': 'RefreshToken=$refreshToken',},
+        Uri.parse("https://7720-1-230-133-117.ngrok-free.app/api/speech-boards/$id/feedback"),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Set-Cookie': 'RefreshToken=$refreshToken',
+        },
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
@@ -94,8 +113,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
           conclusion = data['data']['conclusion'] ?? "";
           topics = List<String>.from(data['data']['topics'] ?? []);
         });
-      }
-      else{
+      } else {
         print("스피치 보드 피드백 : ${response.statusCode}");
       }
     } catch (e) {
@@ -108,9 +126,11 @@ class _FeedbackPageState extends State<FeedbackPage> {
       final accessToken = await getAccessToken();
       final refreshToken = await getRefreshToken();
       final response = await http.get(
-        Uri.parse("https://bb69-1-230-133-117.ngrok-free.app/api/speech-boards/$id/record"),
-        headers: {'Authorization': 'Bearer $accessToken',
-          'Set-Cookie': 'RefreshToken=$refreshToken',},
+        Uri.parse("https://7720-1-230-133-117.ngrok-free.app/api/speech-boards/$id/record"),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Set-Cookie': 'RefreshToken=$refreshToken',
+        },
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
@@ -121,93 +141,16 @@ class _FeedbackPageState extends State<FeedbackPage> {
     }
   }
 
-  Future<void> playAudio(int id) async {
+  Future<void> playAudio() async {
     try {
       await audioPlayer.resume();
       setState(() => isPlaying = true);
     } catch (e) {
-      print("[playAudio] 예외 발생: $e");
+      print("[playAudio] 재생 실패: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("재생에 실패했습니다: $e")),
+      );
     }
-  }
-
-  void _showEditTitleDialog() {
-    TextEditingController editingTitleController = TextEditingController(text: title);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("제목 수정"),
-        content: TextField(
-          controller: editingTitleController,
-          decoration: const InputDecoration(hintText: "새 제목 입력"),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("취소")),
-          ElevatedButton(
-            onPressed: () {
-              final newTitle = editingTitleController.text;
-              setState(() => title = newTitle);
-              Navigator.pop(context);
-            },
-            child: const Text("확인"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditContentDialog() {
-    TextEditingController editContentController = TextEditingController(text: originalStt);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("내용 수정"),
-        content: TextField(
-          controller: editContentController,
-          decoration: const InputDecoration(hintText: "새 내용 입력"),
-          maxLines: null,
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("취소")),
-          ElevatedButton(
-            onPressed: () {
-              final newContent = editContentController.text;
-              setState(() => originalStt = newContent);
-              Navigator.pop(context);
-            },
-            child: const Text("확인"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditOptions() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => Wrap(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.edit),
-            title: const Text("제목 수정"),
-            onTap: () {
-              Navigator.pop(context);
-              _showEditTitleDialog();
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.edit_note),
-            title: const Text("내용 수정"),
-            onTap: () {
-              Navigator.pop(context);
-              _showEditContentDialog();
-            },
-          ),
-        ],
-      ),
-    );
   }
 
   String formatTime(Duration d) => '${d.inMinutes}:${d.inSeconds.remainder(60).toString().padLeft(2, '0')}';
@@ -220,51 +163,47 @@ class _FeedbackPageState extends State<FeedbackPage> {
         backgroundColor: Colors.brown,
         title: const Text('스피치 피드백', style: TextStyle(color: Colors.white)),
         iconTheme: const IconThemeData(color: Colors.white),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit, color: Colors.white),
-            onPressed: _showEditOptions,
-          ),
-        ],
       ),
       body: isFullLoading
-          ? const Center(
-        child: CircularProgressIndicator(color: Colors.brown),
-      )
+          ? const Center(child: CircularProgressIndicator(color: Colors.brown))
           : Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
             child: SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 80),
+              physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("점수 : $score", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
+                  Text("점수 : $score",
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
                   const SizedBox(height: 16),
-                  const Text("변환된 텍스트", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
+                  const Text("변환된 텍스트",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.brown.shade200),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                       color: Colors.white,
                     ),
-                    child: Text(originalStt, style: const TextStyle(fontSize: 16)),
+                    child: Text(originalStt, style: const TextStyle(fontSize: 17)),
                   ),
-                  const SizedBox(height: 16),
-                  const Text("피드백", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
+                  const SizedBox(height: 24),
+                  const Text("피드백",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown)),
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.brown.shade300),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                       color: Colors.white,
                     ),
-                    child: Text(conclusion, style: const TextStyle(fontSize: 16)),
+                    child: Text(conclusion, style: const TextStyle(fontSize: 17)),
                   ),
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
@@ -275,19 +214,18 @@ class _FeedbackPageState extends State<FeedbackPage> {
             bottom: 0,
             child: Container(
               color: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Slider(
                     min: 0,
-                    max: duration.inSeconds.toDouble(),
+                    max: duration.inSeconds.toDouble().clamp(1, double.infinity),
                     value: position.inSeconds.toDouble().clamp(0, duration.inSeconds.toDouble()),
                     activeColor: Colors.brown,
                     onChanged: (value) async {
                       final newPosition = Duration(seconds: value.toInt());
                       await audioPlayer.seek(newPosition);
-                      setState(() => position = newPosition);
                     },
                   ),
                   Row(
@@ -299,10 +237,13 @@ class _FeedbackPageState extends State<FeedbackPage> {
                         onPressed: () async {
                           if (isPlaying) {
                             await audioPlayer.pause();
+                            setState(() => isPlaying = false);
                           } else {
-                            await playAudio(widget.speechBoardId);
+                            if (position >= duration) {
+                              await audioPlayer.seek(Duration.zero);
+                            }
+                            await playAudio();
                           }
-                          setState(() => isPlaying = !isPlaying);
                         },
                       ),
                       Text(formatTime(duration), style: const TextStyle(color: Colors.brown)),

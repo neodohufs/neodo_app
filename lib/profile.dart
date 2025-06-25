@@ -30,7 +30,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final accessToken = await getAccessToken();
     final refreshToken = await getRefreshToken();
 
-    final url = Uri.parse('https://bb69-1-230-133-117.ngrok-free.app/api/users/my-page');
+    final url = Uri.parse('https://7720-1-230-133-117.ngrok-free.app/api/users/my-page');
 
     try {
       final response = await http.get(

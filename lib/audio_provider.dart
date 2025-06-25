@@ -14,7 +14,7 @@ class AudioProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final url = Uri.parse('https://bb69-1-230-133-117.ngrok-free.app/api/speech-boards'); // 백엔드 URL
+    final url = Uri.parse('https://7720-1-230-133-117.ngrok-free.app/api/speech-boards'); // 백엔드 URL
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {

@@ -8,7 +8,7 @@ class ApiService {
     final accessToken = await getAccessToken();
     final refreshToken = await getRefreshToken();
     final url = Uri.parse(
-        'https://bb69-1-230-133-117.ngrok-free.app/api/users/my-page');
+        'https://7720-1-230-133-117.ngrok-free.app/api/users/my-page');
     final response = await http.get(
       url,
       headers: {

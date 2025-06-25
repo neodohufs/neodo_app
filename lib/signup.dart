@@ -126,7 +126,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     try {
       final response = await http.post(
-        Uri.parse("https://bb69-1-230-133-117.ngrok-free.app/api/users/signup"),
+        Uri.parse("https://7720-1-230-133-117.ngrok-free.app/api/users/signup"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({'username': username, 'email': email, 'password': password}),
       );
