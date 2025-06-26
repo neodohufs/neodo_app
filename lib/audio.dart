@@ -11,7 +11,7 @@ class AudioProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> fetchAudioFiles() async {
-    final url = 'https://7720-1-230-133-117.ngrok-free.app/api/speech-boards';
+    final url = 'ip-172-31-37-122.ap-northeast-2.compute.internal/api/speech-boards';
 
     final accessToken = await getAccessToken();
     final refreshToken = await getRefreshToken();

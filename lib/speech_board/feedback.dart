@@ -77,7 +77,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
       final accessToken = await getAccessToken();
       final refreshToken = await getRefreshToken();
       final response = await http.get(
-        Uri.parse("https://7720-1-230-133-117.ngrok-free.app/api/speech-boards/$id/record"),
+        Uri.parse("ip-172-31-37-122.ap-northeast-2.compute.internal/api/speech-boards/$id/record"),
         headers: {
           'Authorization': 'Bearer $accessToken',
           'Set-Cookie': 'RefreshToken=$refreshToken',
@@ -99,7 +99,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
       final accessToken = await getAccessToken();
       final refreshToken = await getRefreshToken();
       final response = await http.get(
-        Uri.parse("https://7720-1-230-133-117.ngrok-free.app/api/speech-boards/$id/feedback"),
+        Uri.parse("ip-172-31-37-122.ap-northeast-2.compute.internal/api/speech-boards/$id/feedback"),
         headers: {
           'Authorization': 'Bearer $accessToken',
           'Set-Cookie': 'RefreshToken=$refreshToken',
@@ -126,7 +126,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
       final accessToken = await getAccessToken();
       final refreshToken = await getRefreshToken();
       final response = await http.get(
-        Uri.parse("https://7720-1-230-133-117.ngrok-free.app/api/speech-boards/$id/record"),
+        Uri.parse("ip-172-31-37-122.ap-northeast-2.compute.internal/api/speech-boards/$id/record"),
         headers: {
           'Authorization': 'Bearer $accessToken',
           'Set-Cookie': 'RefreshToken=$refreshToken',

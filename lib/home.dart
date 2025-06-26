@@ -27,7 +27,7 @@ class _HomePageState extends State<HomePage> {
   GlobalKey<ScaffoldState>(); // GlobalKey 추가
   User? user;
   postFile(File file, String atmosphere, String purpose, String scale, String audience, int deadline, String title) async {
-    final uri = 'https://7720-1-230-133-117.ngrok-free.app/api/speech-boards/record';
+    final uri = 'ip-172-31-37-122.ap-northeast-2.compute.internal/api/speech-boards/record';
 
     // SharedPreferences에서 accessToken 가져오기
     final accessToken = await getAccessToken();

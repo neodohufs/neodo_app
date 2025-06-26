@@ -49,7 +49,7 @@ class _ScriptMetaDataPage extends State<ScriptMetaDataPage> {
     }
 
     final token = await getAccessToken();
-    final uri = Uri.parse('https://7720-1-230-133-117.ngrok-free.app/api/scripts');
+    final uri = Uri.parse('ip-172-31-37-122.ap-northeast-2.compute.internal/api/scripts');
 
     final body = {
       "atmosphere": koreanToEnglish[_selectedAtmosphere],

@@ -30,7 +30,7 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
       final accessToken = await getAccessToken();
       final refreshToken = await getRefreshToken();
       final response = await http.get(
-        Uri.parse("https://7720-1-230-133-117.ngrok-free.app/api/scripts/$scriptId"),
+        Uri.parse("ip-172-31-37-122.ap-northeast-2.compute.internal/api/scripts/$scriptId"),
         headers: {
           'Content-type': 'application/json',
           'Authorization': 'Bearer $accessToken',
@@ -64,7 +64,7 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
       final refreshToken = await getRefreshToken();
       final endpoint = edited ? 'edit-feedback' : 'feedback';
       final response = await http.get(
-        Uri.parse("https://7720-1-230-133-117.ngrok-free.app/api/scripts/$scriptId/$endpoint"),
+        Uri.parse("ip-172-31-37-122.ap-northeast-2.compute.internal/api/scripts/$scriptId/$endpoint"),
         headers: {
           'Content-type': 'application/json',
           'Authorization': 'Bearer $accessToken',
@@ -89,7 +89,7 @@ class _CoachingScriptFeedPageState extends State<CoachingScriptFeedbackPage> {
       final accessToken = await getAccessToken();
       final refreshToken = await getRefreshToken();
       final response = await http.patch(
-        Uri.parse("https://7720-1-230-133-117.ngrok-free.app/api/scripts/${widget.scriptId}/$api"),
+        Uri.parse("ip-172-31-37-122.ap-northeast-2.compute.internal/api/scripts/${widget.scriptId}/$api"),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',

@@ -48,7 +48,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
       final accessToken = await getAccessToken();
       final refreshToken = await getRefreshToken();
       final response = await http.get(
-        Uri.parse("https://7720-1-230-133-117.ngrok-free.app/api/speech-coachings/$id/record"),
+        Uri.parse("ip-172-31-37-122.ap-northeast-2.compute.internal/api/speech-coachings/$id/record"),
         headers: {'Authorization': 'Bearer $accessToken', 'Set-Cookie': 'RefreshToken=$refreshToken'},
       );
       if (response.statusCode == 200) {
@@ -68,7 +68,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
       final accessToken = await getAccessToken();
       final refreshToken = await getRefreshToken();
       final response = await http.get(
-        Uri.parse("https://7720-1-230-133-117.ngrok-free.app/api/speech-coachings/$id/record"),
+        Uri.parse("ip-172-31-37-122.ap-northeast-2.compute.internal/api/speech-coachings/$id/record"),
         headers: {'Authorization': 'Bearer $accessToken', 'Set-Cookie': 'RefreshToken=$refreshToken'},
       );
       if (response.statusCode == 200) {
@@ -93,7 +93,7 @@ class _CoachingFeedbackPageState extends State<CoachingFeedbackPage> {
       final accessToken = await getAccessToken();
       final refreshToken = await getRefreshToken();
       final response = await http.patch(
-        Uri.parse("https://7720-1-230-133-117.ngrok-free.app/api/speech-coachings/${widget.speechCoachingId}/$api"),
+        Uri.parse("ip-172-31-37-122.ap-northeast-2.compute.internal/api/speech-coachings/${widget.speechCoachingId}/$api"),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
