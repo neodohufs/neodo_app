@@ -14,7 +14,7 @@ class AudioProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final url = Uri.parse('ip-172-31-37-122.ap-northeast-2.compute.internal/api/speech-boards'); // 백엔드 URL
+    final url = Uri.parse('http://3.34.1.102:8080/api/speech-boards'); // 백엔드 URL
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {

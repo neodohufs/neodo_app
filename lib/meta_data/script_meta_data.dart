@@ -49,7 +49,7 @@ class _ScriptMetaDataPage extends State<ScriptMetaDataPage> {
     }
 
     final token = await getAccessToken();
-    final uri = Uri.parse('ip-172-31-37-122.ap-northeast-2.compute.internal/api/scripts');
+    final uri = Uri.parse('http://3.34.1.102:8080/api/scripts');
 
     final body = {
       "atmosphere": koreanToEnglish[_selectedAtmosphere],

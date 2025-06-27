@@ -60,7 +60,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
     final accessToken = await getAccessToken();
     final refreshToken = await getRefreshToken();
     final response = await http.get(
-      Uri.parse("ip-172-31-37-122.ap-northeast-2.compute.internal/api/speech-coachings"),
+      Uri.parse("http://3.34.1.102:8080/api/speech-coachings"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
@@ -82,7 +82,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
     final accessToken = await getAccessToken();
     final refreshToken = await getRefreshToken();
     final response = await http.get(
-      Uri.parse("ip-172-31-37-122.ap-northeast-2.compute.internal/api/scripts"),
+      Uri.parse("http://3.34.1.102:8080/api/scripts"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
@@ -138,7 +138,7 @@ class _CoachingPlanPage extends State<CoachingPlanPage> {
       final accessToken = await getAccessToken();
       final refreshToken = await getRefreshToken();
       final response = await http.delete(
-        Uri.parse("ip-172-31-37-122.ap-northeast-2.compute.internal/api/scripts/$scriptId"),
+        Uri.parse("http://3.34.1.102:8080/api/scripts/$scriptId"),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',

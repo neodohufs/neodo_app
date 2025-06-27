@@ -30,7 +30,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final accessToken = await getAccessToken();
     final refreshToken = await getRefreshToken();
 
-    final url = Uri.parse('ip-172-31-37-122.ap-northeast-2.compute.internal/api/users/my-page');
+    final url = Uri.parse('http://3.34.1.102:8080/api/users/my-page');
 
     try {
       final response = await http.get(
